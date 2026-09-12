@@ -1,0 +1,16 @@
+apiVersion: 1
+datasources:
+  - name: PostgreSQL
+    type: postgres
+    uid: lindu_pg
+    url: postgres:5432
+    database: lindu_db
+    user: postgres
+    secureJsonData:
+      password: postgres
+    jsonData:
+      sslmode: disable
+      postgresVersion: 13
+      timescaledb: false
+      database: lindu_db
+    isDefault: true

@@ -1,0 +1,387 @@
+{
+  "title": "Hardware Validation - ESP32 LSM6DS3",
+  "tags": [
+    "hardware",
+    "lindu"
+  ],
+  "timezone": "utc",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Active Nodes (Last 5 Min)",
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT count(DISTINCT node_id) as count FROM sensor_telemetry WHERE node_id IN ($node) AND time > NOW() - INTERVAL '5 minutes'",
+          "format": "table",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "lindu_pg"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "lindu_pg"
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "text": {}
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Raw Dynamic Accelerometer (X, Y, Z)",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT time, node_id, accel_x AS \"X Axis\", accel_y AS \"Y Axis\", accel_z AS \"Z Axis\" FROM sensor_telemetry WHERE node_id IN ($node) AND time > NOW() - INTERVAL '15 minutes' ORDER BY time ASC",
+          "format": "time_series",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "lindu_pg"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "g"
+        }
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "lindu_pg"
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "PGA & RMS Energy",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT time, node_id, pga AS \"PGA (Peak)\", rms AS \"RMS (Noise)\" FROM sensor_telemetry WHERE node_id IN ($node) AND time > NOW() - INTERVAL '15 minutes' ORDER BY time ASC",
+          "format": "time_series",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "lindu_pg"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "fillOpacity": 10,
+            "lineWidth": 2
+          },
+          "unit": "g"
+        }
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "lindu_pg"
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Atmospheric Conditions (Temp, Press, Hum)",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT time, node_id, temperature AS \"Temperature (\u00b0C)\", pressure AS \"Pressure (hPa)\", humidity AS \"Humidity (%)\" FROM sensor_telemetry WHERE node_id IN ($node) AND time > NOW() - INTERVAL '15 minutes' AND temperature IS NOT NULL ORDER BY time ASC",
+          "format": "time_series",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "lindu_pg"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "lineWidth": 2
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pressure (hPa)"
+            },
+            "properties": [
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "unit",
+                "value": "pressurehpa"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperature (\u00b0C)"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "left"
+              }
+            ]
+          }
+        ]
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "lindu_pg"
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Current Tilt Angle",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 20
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT DISTINCT ON (node_id) time, node_id, tilt_angle FROM sensor_status WHERE node_id IN ($node) AND time > NOW() - INTERVAL '15 minutes' ORDER BY node_id, time DESC",
+          "format": "table",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "lindu_pg"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "degree"
+        }
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "lindu_pg"
+      },
+      "options": {
+        "reduceOptions": {
+          "values": true,
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Physical Pose",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 20
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT DISTINCT ON (node_id) time, node_id, pose FROM sensor_status WHERE node_id IN ($node) AND time > NOW() - INTERVAL '15 minutes' ORDER BY node_id, time DESC",
+          "format": "table",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "lindu_pg"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "lindu_pg"
+      },
+      "options": {
+        "reduceOptions": {
+          "values": true,
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Network Latency (ESP32 to MQTT)",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 12
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT time, node_id, latency_ms AS \"Latency (ms)\" FROM sensor_telemetry WHERE node_id IN ($node) AND time > NOW() - INTERVAL '15 minutes' AND latency_ms IS NOT NULL ORDER BY time ASC",
+          "format": "time_series",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "lindu_pg"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 100
+              },
+              {
+                "color": "red",
+                "value": 500
+              }
+            ]
+          }
+        }
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "lindu_pg"
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Hardware Health (I2C)",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 12
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT DISTINCT ON (node_id) time, node_id, sensor_ok FROM sensor_status WHERE node_id IN ($node) AND time > NOW() - INTERVAL '15 minutes' ORDER BY node_id, time DESC",
+          "format": "table",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "lindu_pg"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "options": {
+                "true": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "\u2705 SENSOR OK"
+                },
+                "false": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "\u274c SENSOR ERROR"
+                }
+              },
+              "type": "value"
+            }
+          ]
+        }
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "lindu_pg"
+      },
+      "options": {
+        "reduceOptions": {
+          "values": true,
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      }
+    }
+  ],
+  "refresh": "1s",
+  "templating": {
+    "list": [
+      {
+        "name": "node",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "lindu_pg"
+        },
+        "query": "SELECT DISTINCT node_id FROM sensor_telemetry",
+        "refresh": 1,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "allValue": null
+      }
+    ]
+  }
+}
