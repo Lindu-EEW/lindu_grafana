@@ -1,3 +1,4 @@
+import threading
 import paho.mqtt.client as mqtt
 import psycopg2
 import json
@@ -66,13 +67,14 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     try:
         topic = msg.topic
+        print(f'Received: {topic}')
         payload = json.loads(msg.payload.decode('utf-8'))
         now = datetime.now(timezone.utc)
         
         if topic.endswith("/data") or topic.endswith("/telemetry"):
             node_id = topic.split("/")[2]
             pga = payload.get("pga", 0.0)
-            rms = payload.get("rms", 0.0)
+            rms = payload.get("sta_lta", payload.get("rms", 0.0))
             ax = payload.get("ax", payload.get("dyn_x", 0.0))
             ay = payload.get("ay", payload.get("dyn_y", 0.0))
             az = payload.get("az", payload.get("dyn_z", 0.0))

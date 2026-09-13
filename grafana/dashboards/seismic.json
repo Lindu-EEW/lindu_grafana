@@ -61,7 +61,7 @@
     },
     {
       "type": "timeseries",
-      "title": "Raw Dynamic Accelerometer (X, Y, Z)",
+      "title": "Grafik Seismogram Live (Total Guncangan 3D)",
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -71,7 +71,7 @@
       "targets": [
         {
           "refId": "A",
-          "rawSql": "SELECT time, node_id, accel_x AS \"X Axis\", accel_y AS \"Y Axis\", accel_z AS \"Z Axis\" FROM sensor_telemetry WHERE node_id IN ($node) AND time > NOW() - INTERVAL '15 minutes' ORDER BY time ASC",
+          "rawSql": "\nSELECT \n  time AS \"time\", \n  node_id AS \"metric\",\n  pga AS \"Total Guncangan (PGA)\"\nFROM sensor_telemetry \nWHERE node_id IN ($node) AND time > NOW() - INTERVAL '15 minutes' \nORDER BY time ASC\n",
           "format": "time_series",
           "datasource": {
             "type": "grafana-postgresql-datasource",
@@ -81,17 +81,34 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "g"
-        }
+          "unit": "g",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "spanNulls": false
+          }
+        },
+        "overrides": []
       },
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "lindu_pg"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
       }
     },
     {
       "type": "timeseries",
-      "title": "PGA & RMS Energy",
+      "title": "Rasio Validasi Gempa (STA / LTA)",
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -101,7 +118,7 @@
       "targets": [
         {
           "refId": "A",
-          "rawSql": "SELECT time, node_id, pga AS \"PGA (Peak)\", rms AS \"RMS (Noise)\" FROM sensor_telemetry WHERE node_id IN ($node) AND time > NOW() - INTERVAL '15 minutes' ORDER BY time ASC",
+          "rawSql": "\nSELECT \n  time AS \"time\", \n  node_id AS \"metric\",\n  rms AS \"STA/LTA Ratio\" \nFROM sensor_telemetry \nWHERE node_id IN ($node) AND time > NOW() - INTERVAL '15 minutes' \nORDER BY time ASC\n",
           "format": "time_series",
           "datasource": {
             "type": "grafana-postgresql-datasource",
@@ -116,7 +133,7 @@
             "lineWidth": 2,
             "gradientMode": "opacity"
           },
-          "unit": "g"
+          "unit": "none"
         }
       },
       "datasource": {
@@ -363,6 +380,31 @@
             "lastNotNull"
           ]
         }
+      }
+    },
+    {
+      "type": "table",
+      "title": "\ud83d\udea8 Log Gempa Tervalidasi (Sistem Konsensus Multi-Node)",
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT time AS \"Waktu Gempa\", magnitude AS \"Magnitudo\", radius_km AS \"Radius Terdampak (km)\", description AS \"Detail Analisis\" FROM tb_system_alerts ORDER BY time DESC LIMIT 10",
+          "format": "table",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "lindu_pg"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "lindu_pg"
       }
     }
   ],
