@@ -15,8 +15,49 @@ DB_NAME = os.getenv("DB_NAME", "lindu_db")
 
 time.sleep(5)
 conn = psycopg2.connect(host=DB_HOST, user=DB_USER, password=DB_PASS, dbname=DB_NAME)
-conn.autocommit = True
+conn.autocommit = False
 cursor = conn.cursor()
+
+# Buffer antrean untuk Batch Insert (Sangat Efisien)
+telemetry_buffer = []
+status_buffer = []
+buffer_lock = threading.Lock()
+
+def db_writer_thread():
+    global telemetry_buffer, status_buffer
+    while True:
+        time.sleep(0.5) # Flush ke database setiap 0.5 detik
+        
+        with buffer_lock:
+            local_telemetry = telemetry_buffer[:]
+            local_status = status_buffer[:]
+            telemetry_buffer.clear()
+            status_buffer.clear()
+            
+        if local_telemetry:
+            try:
+                cursor.executemany(
+                    "INSERT INTO sensor_telemetry (time, node_id, pga, rms, accel_x, accel_y, accel_z, temperature, pressure, humidity, latency_ms) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                    local_telemetry
+                )
+                conn.commit()
+            except Exception as e:
+                print(f"Error Batch Telemetry: {e}")
+                conn.rollback()
+                
+        if local_status:
+            try:
+                cursor.executemany(
+                    "INSERT INTO sensor_status (time, node_id, status, pose, tilt_angle, latency_ms, sensor_ok) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                    local_status
+                )
+                conn.commit()
+            except Exception as e:
+                print(f"Error Batch Status: {e}")
+                conn.rollback()
+
+threading.Thread(target=db_writer_thread, daemon=True).start()
+
 
 def on_connect(client, userdata, flags, rc):
     print(f"Ingester terhubung (rc={rc})")
@@ -48,10 +89,8 @@ def on_message(client, userdata, msg):
             if sent_ts:
                 latency = (time.time() - sent_ts) * 1000.0 # Convert to milliseconds
                 
-            cursor.execute(
-                "INSERT INTO sensor_telemetry (time, node_id, pga, rms, accel_x, accel_y, accel_z, temperature, pressure, humidity, latency_ms) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                (now, node_id, pga, rms, ax, ay, az, temp, press, hum, latency)
-            )
+            with buffer_lock:
+                telemetry_buffer.append((now, node_id, pga, rms, ax, ay, az, temp, press, hum, latency))
             
         elif topic.endswith("/status"):
             node_id = payload.get("node_id", "unknown")
@@ -67,10 +106,8 @@ def on_message(client, userdata, msg):
                 
             
             sensor_ok = payload.get("sensor_ok", False)
-            cursor.execute(
-                "INSERT INTO sensor_status (time, node_id, status, pose, tilt_angle, latency_ms, sensor_ok) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                (now, node_id, status, pose, tilt, latency, sensor_ok)
-            )
+            with buffer_lock:
+                status_buffer.append((now, node_id, status, pose, tilt, latency, sensor_ok))
     except Exception as e:
         print(f"Error: {e}")
 

@@ -112,8 +112,9 @@
       "fieldConfig": {
         "defaults": {
           "custom": {
-            "fillOpacity": 10,
-            "lineWidth": 2
+            "fillOpacity": 20,
+            "lineWidth": 2,
+            "gradientMode": "opacity"
           },
           "unit": "g"
         }
