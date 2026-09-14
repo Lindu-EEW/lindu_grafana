@@ -4,6 +4,8 @@ import psycopg2
 import json
 import time
 import os
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 from datetime import datetime, timezone
 
 # Konfigurasi
@@ -38,7 +40,7 @@ def db_writer_thread():
         if local_telemetry:
             try:
                 cursor.executemany(
-                    "INSERT INTO sensor_telemetry (time, node_id, pga, rms, accel_x, accel_y, accel_z, temperature, pressure, humidity, latency_ms) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                    "INSERT INTO sensor_telemetry (time, node_id, pga, rms, accel_x, accel_y, accel_z, temperature, pressure, humidity, latency_ms, valve_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                     local_telemetry
                 )
                 conn.commit()
@@ -49,7 +51,7 @@ def db_writer_thread():
         if local_status:
             try:
                 cursor.executemany(
-                    "INSERT INTO sensor_status (time, node_id, status, pose, tilt_angle, latency_ms, sensor_ok) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                    "INSERT INTO sensor_status (time, node_id, status, pose, tilt_angle, latency_ms, sensor_ok, fw_version, ota_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
                     local_status
                 )
                 conn.commit()
@@ -83,6 +85,7 @@ def on_message(client, userdata, msg):
             temp = payload.get("temperature", None)
             press = payload.get("pressure", None)
             hum = payload.get("humidity", None)
+            valve = payload.get("valve_status", "UNKNOWN")
             
             
             # Calculate Latency (if ESP32 sends its NTP synced epoch timestamp)
@@ -92,7 +95,7 @@ def on_message(client, userdata, msg):
                 latency = (time.time() - sent_ts) * 1000.0 # Convert to milliseconds
                 
             with buffer_lock:
-                telemetry_buffer.append((now, node_id, pga, rms, ax, ay, az, temp, press, hum, latency))
+                telemetry_buffer.append((now, node_id, pga, rms, ax, ay, az, temp, press, hum, latency, valve))
             
         elif topic.endswith("/status"):
             node_id = payload.get("node_id", "unknown")
@@ -108,8 +111,10 @@ def on_message(client, userdata, msg):
                 
             
             sensor_ok = payload.get("sensor_ok", False)
+            fw_version = payload.get("fw_version", "UNKNOWN")
+            ota_status = payload.get("ota_status", "IDLE")
             with buffer_lock:
-                status_buffer.append((now, node_id, status, pose, tilt, latency, sensor_ok))
+                status_buffer.append((now, node_id, status, pose, tilt, latency, sensor_ok, fw_version, ota_status))
     except Exception as e:
         print(f"Error: {e}")
 
@@ -124,4 +129,32 @@ while True:
     except:
         time.sleep(2)
 
-client.loop_forever()
+
+# Jalankan MQTT di background
+client.loop_start()
+
+# Setup Flask API
+app = Flask(__name__)
+CORS(app)
+
+@app.route('/api/cmd', methods=['POST'])
+def send_cmd():
+    try:
+        data = request.json
+        cmd = data.get('cmd')
+        target = data.get('target_node', 'all')
+        if not cmd:
+            return jsonify({"error": "Missing cmd"}), 400
+            
+        payload = {"cmd": cmd, "target_node": target}
+        if cmd == "set_location":
+            payload["lat"] = float(data.get("lat", 0.0))
+            payload["lon"] = float(data.get("lon", 0.0))
+        client.publish("lindu/actuator/cmd/all", json.dumps(payload))
+        return jsonify({"status": "success"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
+
