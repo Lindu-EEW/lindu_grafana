@@ -248,7 +248,9 @@
           "custom": {
             "lineWidth": 2
           },
-          "unit": "celsius"
+          "unit": "celsius",
+          "min": 15,
+          "max": 45
         },
         "overrides": []
       },
@@ -283,7 +285,9 @@
           "custom": {
             "lineWidth": 2
           },
-          "unit": "pressurehpa"
+          "unit": "pressurehpa",
+          "min": 980,
+          "max": 1030
         },
         "overrides": []
       },
