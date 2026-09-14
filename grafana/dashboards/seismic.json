@@ -7,11 +7,90 @@
   "timezone": "utc",
   "panels": [
     {
+      "type": "table",
+      "title": "\ud83d\udce1 Live Fleet Status (Online / Offline)",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 0
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "lindu_pg"
+      },
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT DISTINCT ON (node_id) node_id as \"Node ID\", CASE WHEN status = 'offline' THEN 'OFFLINE' ELSE 'ONLINE' END as \"Status\", fw_version as \"Firmware\", time as \"Last Seen\" FROM sensor_status WHERE node_id IN ($node) AND time >= NOW() - INTERVAL '1 hour' ORDER BY node_id, time DESC;",
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "lindu_pg"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "OFFLINE": {
+                        "color": "red",
+                        "index": 0,
+                        "text": "\ud83d\udd34 OFFLINE"
+                      },
+                      "ONLINE": {
+                        "color": "green",
+                        "index": 1,
+                        "text": "\ud83d\udfe2 ONLINE"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "Status"
+          }
+        ]
+      },
+      "id": 14
+    },
+    {
       "type": "stat",
       "title": "Active Nodes (Last 5 Min)",
       "gridPos": {
-        "h": 4,
-        "w": 24,
+        "h": 5,
+        "w": 4,
         "x": 0,
         "y": 0
       },
@@ -57,7 +136,8 @@
           }
         },
         "overrides": []
-      }
+      },
+      "id": 1
     },
     {
       "type": "timeseries",
@@ -104,7 +184,8 @@
         "tooltip": {
           "mode": "single"
         }
-      }
+      },
+      "id": 2
     },
     {
       "type": "timeseries",
@@ -139,21 +220,22 @@
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "lindu_pg"
-      }
+      },
+      "id": 3
     },
     {
       "type": "timeseries",
-      "title": "Atmospheric Conditions (Temp, Press, Hum)",
+      "title": "Temperature (\u00b0C)",
       "gridPos": {
         "h": 8,
-        "w": 24,
+        "w": 12,
         "x": 0,
         "y": 12
       },
       "targets": [
         {
           "refId": "A",
-          "rawSql": "SELECT time, node_id, temperature AS \"Temperature (\u00b0C)\", pressure AS \"Pressure (hPa)\", humidity AS \"Humidity (%)\" FROM sensor_telemetry WHERE node_id IN ($node) AND time > NOW() - INTERVAL '15 minutes' AND temperature IS NOT NULL ORDER BY time ASC",
+          "rawSql": "SELECT time, node_id, temperature AS \"Temperature (\u00b0C)\" FROM sensor_telemetry WHERE node_id IN ($node) AND time > NOW() - INTERVAL '15 minutes' AND temperature IS NOT NULL ORDER BY time ASC",
           "format": "time_series",
           "datasource": {
             "type": "grafana-postgresql-datasource",
@@ -165,56 +247,60 @@
         "defaults": {
           "custom": {
             "lineWidth": 2
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Pressure (hPa)"
-            },
-            "properties": [
-              {
-                "id": "custom.axisPlacement",
-                "value": "right"
-              },
-              {
-                "id": "unit",
-                "value": "pressurehpa"
-              }
-            ]
           },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Temperature (\u00b0C)"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "celsius"
-              },
-              {
-                "id": "custom.axisPlacement",
-                "value": "left"
-              }
-            ]
-          }
-        ]
+          "unit": "celsius"
+        },
+        "overrides": []
       },
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "lindu_pg"
-      }
+      },
+      "id": 4
+    },
+    {
+      "type": "timeseries",
+      "title": "Barometric Pressure (hPa)",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 12
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT time, node_id, pressure AS \"Pressure (hPa)\" FROM sensor_telemetry WHERE node_id IN ($node) AND time > NOW() - INTERVAL '15 minutes' AND pressure IS NOT NULL ORDER BY time ASC",
+          "format": "time_series",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "lindu_pg"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "lineWidth": 2
+          },
+          "unit": "pressurehpa"
+        },
+        "overrides": []
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "lindu_pg"
+      },
+      "id": 5
     },
     {
       "type": "stat",
       "title": "Current Tilt Angle",
       "gridPos": {
-        "h": 4,
-        "w": 6,
+        "h": 8,
+        "w": 8,
         "x": 0,
-        "y": 20
+        "y": 26
       },
       "targets": [
         {
@@ -243,16 +329,17 @@
             "lastNotNull"
           ]
         }
-      }
+      },
+      "id": 6
     },
     {
       "type": "stat",
       "title": "Physical Pose",
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 6,
-        "y": 20
+        "w": 12,
+        "x": 0,
+        "y": 34
       },
       "targets": [
         {
@@ -276,21 +363,22 @@
             "lastNotNull"
           ]
         }
-      }
+      },
+      "id": 7
     },
     {
       "type": "timeseries",
       "title": "Network Latency (ESP32 to MQTT)",
       "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 12,
-        "y": 12
+        "h": 8,
+        "w": 16,
+        "x": 8,
+        "y": 26
       },
       "targets": [
         {
           "refId": "A",
-          "rawSql": "SELECT time, node_id, latency_ms AS \"Latency (ms)\" FROM sensor_telemetry WHERE node_id IN ($node) AND time > NOW() - INTERVAL '15 minutes' AND latency_ms IS NOT NULL ORDER BY time ASC",
+          "rawSql": "SELECT time, node_id AS metric, latency_ms AS value FROM sensor_telemetry WHERE node_id IN ($node) AND time > NOW() - INTERVAL '15 minutes' AND latency_ms IS NOT NULL ORDER BY time ASC",
           "format": "time_series",
           "datasource": {
             "type": "grafana-postgresql-datasource",
@@ -326,21 +414,22 @@
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "lindu_pg"
-      }
+      },
+      "id": 8
     },
     {
       "type": "stat",
       "title": "Hardware Health (I2C)",
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 18,
-        "y": 12
+        "w": 12,
+        "x": 12,
+        "y": 34
       },
       "targets": [
         {
           "refId": "A",
-          "rawSql": "SELECT DISTINCT ON (node_id) time, node_id, sensor_ok FROM sensor_status WHERE node_id IN ($node) AND time > NOW() - INTERVAL '15 minutes' ORDER BY node_id, time DESC",
+          "rawSql": "SELECT DISTINCT ON (node_id) time, node_id, sensor_ok::text FROM sensor_status WHERE node_id IN ($node) AND time > NOW() - INTERVAL '15 minutes' ORDER BY node_id, time DESC",
           "format": "table",
           "datasource": {
             "type": "grafana-postgresql-datasource",
@@ -380,16 +469,17 @@
             "lastNotNull"
           ]
         }
-      }
+      },
+      "id": 9
     },
     {
       "type": "table",
       "title": "\ud83d\udea8 Log Gempa Tervalidasi (Sistem Konsensus Multi-Node)",
       "gridPos": {
-        "h": 6,
+        "h": 8,
         "w": 24,
         "x": 0,
-        "y": 24
+        "y": 38
       },
       "targets": [
         {
@@ -405,7 +495,66 @@
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "lindu_pg"
+      },
+      "id": 10
+    },
+    {
+      "type": "table",
+      "title": "Actuator Valve Status",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 20
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "lindu_pg"
+      },
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT DISTINCT ON (node_id) time, node_id, valve_status FROM sensor_telemetry WHERE node_id IN ($node) AND time >= NOW() - INTERVAL '1 minute' AND valve_status IS NOT NULL ORDER BY node_id, time DESC;",
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "lindu_pg"
+          }
+        }
+      ],
+      "options": {
+        "showHeader": true
+      },
+      "id": 11,
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "white"
+          },
+          "custom": {
+            "align": "auto",
+            "displayMode": "color-text"
+          }
+        },
+        "overrides": []
       }
+    },
+    {
+      "id": 13,
+      "title": "Interactive Command Center",
+      "type": "text",
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 4,
+        "y": 0
+      },
+      "options": {
+        "mode": "html",
+        "content": "\n<div style=\"padding: 10px; background-color: #1a1b26; border-radius: 8px; border: 1px solid #2ac06d;\">\n  <h3 style=\"color: #2ac06d; margin-top: 0;\"><i class=\"fa fa-terminal\"></i> Command Center (Interactive)</h3>\n  <p style=\"color: #9aa5ce; font-size: 12px; margin-bottom: 15px;\">Send real-time commands to the ESP32 network directly from Grafana.</p>\n  \n  <div style=\"display: flex; gap: 10px; flex-wrap: wrap;\">\n    <input type=\"text\" id=\"targetNode\" placeholder=\"Target Node (e.g., node_3c096f0c atau all)\" value=\"all\" style=\"padding: 8px; background: #24283b; color: #fff; border: 1px solid #414868; border-radius: 4px; flex: 1; min-width: 200px;\">\n  </div>\n  \n  <div style=\"display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;\">\n    <button onclick=\"sendCmd('disable_valve')\" style=\"background: #f7768e; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1;\"><i class=\"fa fa-lock\"></i> LOCK VALVE</button>\n    <button onclick=\"sendCmd('enable_valve')\" style=\"background: #9ece6a; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1;\"><i class=\"fa fa-unlock\"></i> UNLOCK VALVE</button>\n  </div>\n  \n  <div style=\"display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;\">\n    <button onclick=\"sendCmd('identify')\" style=\"background: #e0af68; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1;\"><i class=\"fa fa-lightbulb-o\"></i> IDENTIFY NODE (BLINK WHITE)</button>\n    <button onclick=\"sendCmd('force_update')\" style=\"background: #7aa2f7; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1;\"><i class=\"fa fa-download\"></i> FORCE OTA UPDATE</button>\n  </div>\n  \n  <p id=\"cmdResult\" style=\"margin-top: 15px; font-family: monospace; font-size: 12px; color: #bb9af7;\"></p>\n</div>\n\n<script>\n  function sendCmd(command) {\n    const target = document.getElementById('targetNode').value || 'all';\n    const resultBox = document.getElementById('cmdResult');\n    resultBox.innerText = `Sending command '${command}' to '${target}'...`;\n    resultBox.style.color = '#e0af68';\n    \n    fetch('http://localhost:5001/api/cmd', {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ cmd: command, target_node: target })\n    })\n    .then(res => res.json())\n    .then(data => {\n      if (data.status === 'success') {\n        resultBox.innerText = `[SUCCESS] Command sent to MQTT broker!`;\n        resultBox.style.color = '#9ece6a';\n      } else {\n        resultBox.innerText = `[ERROR] ${data.error}`;\n        resultBox.style.color = '#f7768e';\n      }\n    })\n    .catch(err => {\n      resultBox.innerText = `[NETWORK ERROR] Could not connect to API at localhost:5000.`;\n      resultBox.style.color = '#f7768e';\n    });\n  }\n</script>\n"
+      },
+      "transparent": true
     }
   ],
   "refresh": "1s",
@@ -425,6 +574,21 @@
         "includeAll": true,
         "allValue": null
       }
+    ]
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "1s",
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
     ]
   }
 }
