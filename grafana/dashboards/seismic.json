@@ -565,7 +565,10 @@
           }
         ],
         "basemap": {
-          "type": "arcgis",
+          "type": "custom",
+          "config": {
+            "url": "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+          },
           "name": "Layer 0"
         }
       },
