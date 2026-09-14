@@ -10,9 +10,9 @@
       "type": "table",
       "title": "\ud83d\udce1 Live Fleet Status (Online / Offline)",
       "gridPos": {
+        "w": 12,
         "h": 5,
-        "w": 8,
-        "x": 8,
+        "x": 12,
         "y": 0
       },
       "datasource": {
@@ -89,8 +89,8 @@
       "type": "stat",
       "title": "Active Nodes (Last 5 Min)",
       "gridPos": {
-        "h": 5,
         "w": 4,
+        "h": 5,
         "x": 0,
         "y": 0
       },
@@ -143,10 +143,10 @@
       "type": "timeseries",
       "title": "Grafik Seismogram Live (Total Guncangan 3D)",
       "gridPos": {
-        "h": 8,
         "w": 12,
+        "h": 8,
         "x": 0,
-        "y": 4
+        "y": 5
       },
       "targets": [
         {
@@ -191,10 +191,10 @@
       "type": "timeseries",
       "title": "Rasio Validasi Gempa (STA / LTA)",
       "gridPos": {
-        "h": 8,
         "w": 12,
+        "h": 8,
         "x": 12,
-        "y": 4
+        "y": 5
       },
       "targets": [
         {
@@ -227,10 +227,10 @@
       "type": "timeseries",
       "title": "Temperature (\u00b0C)",
       "gridPos": {
-        "h": 8,
         "w": 12,
+        "h": 8,
         "x": 0,
-        "y": 12
+        "y": 13
       },
       "targets": [
         {
@@ -262,10 +262,10 @@
       "type": "timeseries",
       "title": "Barometric Pressure (hPa)",
       "gridPos": {
-        "h": 8,
         "w": 12,
+        "h": 8,
         "x": 12,
-        "y": 12
+        "y": 13
       },
       "targets": [
         {
@@ -297,10 +297,10 @@
       "type": "stat",
       "title": "Current Tilt Angle",
       "gridPos": {
-        "h": 8,
         "w": 8,
+        "h": 8,
         "x": 0,
-        "y": 26
+        "y": 21
       },
       "targets": [
         {
@@ -336,10 +336,10 @@
       "type": "stat",
       "title": "Physical Pose",
       "gridPos": {
-        "h": 4,
         "w": 12,
+        "h": 4,
         "x": 0,
-        "y": 34
+        "y": 29
       },
       "targets": [
         {
@@ -370,10 +370,10 @@
       "type": "timeseries",
       "title": "Network Latency (ESP32 to MQTT)",
       "gridPos": {
-        "h": 8,
         "w": 16,
+        "h": 8,
         "x": 8,
-        "y": 26
+        "y": 21
       },
       "targets": [
         {
@@ -421,10 +421,10 @@
       "type": "stat",
       "title": "Hardware Health (I2C)",
       "gridPos": {
-        "h": 4,
         "w": 12,
+        "h": 4,
         "x": 12,
-        "y": 34
+        "y": 29
       },
       "targets": [
         {
@@ -476,10 +476,10 @@
       "type": "table",
       "title": "\ud83d\udea8 Log Gempa Tervalidasi (Sistem Konsensus Multi-Node)",
       "gridPos": {
-        "h": 8,
         "w": 24,
+        "h": 8,
         "x": 0,
-        "y": 38
+        "y": 33
       },
       "targets": [
         {
@@ -502,10 +502,10 @@
       "type": "table",
       "title": "Actuator Valve Status",
       "gridPos": {
-        "h": 6,
         "w": 12,
-        "x": 12,
-        "y": 20
+        "h": 6,
+        "x": 0,
+        "y": 41
       },
       "datasource": {
         "type": "grafana-postgresql-datasource",
@@ -545,14 +545,14 @@
       "title": "Interactive Command Center",
       "type": "text",
       "gridPos": {
+        "w": 8,
         "h": 5,
-        "w": 4,
         "x": 4,
         "y": 0
       },
       "options": {
         "mode": "html",
-        "content": "\n<div style=\"padding: 10px; background-color: #1a1b26; border-radius: 8px; border: 1px solid #2ac06d;\">\n  <h3 style=\"color: #2ac06d; margin-top: 0;\"><i class=\"fa fa-terminal\"></i> Command Center (Interactive)</h3>\n  <p style=\"color: #9aa5ce; font-size: 12px; margin-bottom: 15px;\">Send real-time commands to the ESP32 network directly from Grafana.</p>\n  \n  <div style=\"display: flex; gap: 10px; flex-wrap: wrap;\">\n    <input type=\"text\" id=\"targetNode\" placeholder=\"Target Node (e.g., node_3c096f0c atau all)\" value=\"all\" style=\"padding: 8px; background: #24283b; color: #fff; border: 1px solid #414868; border-radius: 4px; flex: 1; min-width: 200px;\">\n  </div>\n  \n  <div style=\"display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;\">\n    <button onclick=\"sendCmd('disable_valve')\" style=\"background: #f7768e; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1;\"><i class=\"fa fa-lock\"></i> LOCK VALVE</button>\n    <button onclick=\"sendCmd('enable_valve')\" style=\"background: #9ece6a; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1;\"><i class=\"fa fa-unlock\"></i> UNLOCK VALVE</button>\n  </div>\n  \n  <div style=\"display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;\">\n    <button onclick=\"sendCmd('identify')\" style=\"background: #e0af68; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1;\"><i class=\"fa fa-lightbulb-o\"></i> IDENTIFY NODE (BLINK WHITE)</button>\n    <button onclick=\"sendCmd('force_update')\" style=\"background: #7aa2f7; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1;\"><i class=\"fa fa-download\"></i> FORCE OTA UPDATE</button>\n  </div>\n  \n  <p id=\"cmdResult\" style=\"margin-top: 15px; font-family: monospace; font-size: 12px; color: #bb9af7;\"></p>\n</div>\n\n<script>\n  function sendCmd(command) {\n    const target = document.getElementById('targetNode').value || 'all';\n    const resultBox = document.getElementById('cmdResult');\n    resultBox.innerText = `Sending command '${command}' to '${target}'...`;\n    resultBox.style.color = '#e0af68';\n    \n    fetch('http://localhost:5001/api/cmd', {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ cmd: command, target_node: target })\n    })\n    .then(res => res.json())\n    .then(data => {\n      if (data.status === 'success') {\n        resultBox.innerText = `[SUCCESS] Command sent to MQTT broker!`;\n        resultBox.style.color = '#9ece6a';\n      } else {\n        resultBox.innerText = `[ERROR] ${data.error}`;\n        resultBox.style.color = '#f7768e';\n      }\n    })\n    .catch(err => {\n      resultBox.innerText = `[NETWORK ERROR] Could not connect to API at localhost:5000.`;\n      resultBox.style.color = '#f7768e';\n    });\n  }\n</script>\n"
+        "content": "\n<div style=\"padding: 10px; background-color: #1a1b26; border-radius: 8px; border: 1px solid #2ac06d;\">\n  <h3 style=\"color: #2ac06d; margin-top: 0;\"><i class=\"fa fa-terminal\"></i> Command Center (Interactive)</h3>\n  <p style=\"color: #9aa5ce; font-size: 12px; margin-bottom: 15px;\">Send real-time commands to the ESP32 network directly from Grafana.</p>\n  \n  <div style=\"display: flex; gap: 10px; flex-wrap: wrap;\">\n    <input type=\"text\" id=\"targetNode\" placeholder=\"Target Node (e.g., node_3c096f0c atau all)\" value=\"all\" style=\"padding: 8px; background: #24283b; color: #fff; border: 1px solid #414868; border-radius: 4px; flex: 1; min-width: 200px;\">\n  </div>\n  \n  <div style=\"display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;\">\n    <button onclick=\"sendCmd('disable_valve')\" style=\"background: #f7768e; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1;\"><i class=\"fa fa-lock\"></i> LOCK VALVE</button>\n    <button onclick=\"sendCmd('enable_valve')\" style=\"background: #9ece6a; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1;\"><i class=\"fa fa-unlock\"></i> UNLOCK VALVE</button>\n  </div>\n  \n  <div style=\"display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;\">\n    <button onclick=\"sendCmd('identify')\" style=\"background: #e0af68; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1;\"><i class=\"fa fa-lightbulb-o\"></i> IDENTIFY NODE (BLINK WHITE)</button>\n    <button onclick=\"sendCmd('force_update')\" style=\"background: #7aa2f7; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1;\"><i class=\"fa fa-download\"></i> FORCE OTA UPDATE</button>\n  </div>\n  <div style=\"display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;\">\n    <button onclick=\"if(confirm('Yakin mereset WiFi & LongLat? Alat akan offline.')) sendCmd('factory_reset')\" style=\"background: #f7768e; color: #ffffff; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1;\"><i class=\"fa fa-warning\"></i> FACTORY RESET NODE</button>\n  </div>\n  \n  <p id=\"cmdResult\" style=\"margin-top: 15px; font-family: monospace; font-size: 12px; color: #bb9af7;\"></p>\n</div>\n\n<script>\n  function sendCmd(command) {\n    const target = document.getElementById('targetNode').value || 'all';\n    const resultBox = document.getElementById('cmdResult');\n    resultBox.innerText = `Sending command '${command}' to '${target}'...`;\n    resultBox.style.color = '#e0af68';\n    \n    fetch('http://localhost:5001/api/cmd', {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ cmd: command, target_node: target })\n    })\n    .then(res => res.json())\n    .then(data => {\n      if (data.status === 'success') {\n        resultBox.innerText = `[SUCCESS] Command sent to MQTT broker!`;\n        resultBox.style.color = '#9ece6a';\n      } else {\n        resultBox.innerText = `[ERROR] ${data.error}`;\n        resultBox.style.color = '#f7768e';\n      }\n    })\n    .catch(err => {\n      resultBox.innerText = `[NETWORK ERROR] Could not connect to API at localhost:5000.`;\n      resultBox.style.color = '#f7768e';\n    });\n  }\n</script>\n"
       },
       "transparent": true
     }
