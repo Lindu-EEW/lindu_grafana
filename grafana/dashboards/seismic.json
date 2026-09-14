@@ -565,7 +565,7 @@
           }
         ],
         "basemap": {
-          "type": "default",
+          "type": "osm",
           "name": "Layer 0"
         }
       },
