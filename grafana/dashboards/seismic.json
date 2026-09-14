@@ -333,40 +333,6 @@
       "id": 6
     },
     {
-      "type": "stat",
-      "title": "Physical Pose",
-      "gridPos": {
-        "w": 12,
-        "h": 4,
-        "x": 0,
-        "y": 29
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "rawSql": "SELECT DISTINCT ON (node_id) time, node_id, pose FROM sensor_status WHERE node_id IN ($node) AND time > NOW() - INTERVAL '15 minutes' ORDER BY node_id, time DESC",
-          "format": "table",
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "lindu_pg"
-          }
-        }
-      ],
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "lindu_pg"
-      },
-      "options": {
-        "reduceOptions": {
-          "values": true,
-          "calcs": [
-            "lastNotNull"
-          ]
-        }
-      },
-      "id": 7
-    },
-    {
       "type": "timeseries",
       "title": "Network Latency (ESP32 to MQTT)",
       "gridPos": {
@@ -416,61 +382,6 @@
         "uid": "lindu_pg"
       },
       "id": 8
-    },
-    {
-      "type": "stat",
-      "title": "Hardware Health (I2C)",
-      "gridPos": {
-        "w": 12,
-        "h": 4,
-        "x": 12,
-        "y": 29
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "rawSql": "SELECT DISTINCT ON (node_id) time, node_id, sensor_ok::text FROM sensor_status WHERE node_id IN ($node) AND time > NOW() - INTERVAL '15 minutes' ORDER BY node_id, time DESC",
-          "format": "table",
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "lindu_pg"
-          }
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [
-            {
-              "options": {
-                "true": {
-                  "color": "green",
-                  "index": 0,
-                  "text": "\u2705 SENSOR OK"
-                },
-                "false": {
-                  "color": "red",
-                  "index": 1,
-                  "text": "\u274c SENSOR ERROR"
-                }
-              },
-              "type": "value"
-            }
-          ]
-        }
-      },
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "lindu_pg"
-      },
-      "options": {
-        "reduceOptions": {
-          "values": true,
-          "calcs": [
-            "lastNotNull"
-          ]
-        }
-      },
-      "id": 9
     },
     {
       "type": "table",
@@ -546,7 +457,7 @@
       "type": "text",
       "gridPos": {
         "w": 24,
-        "h": 6,
+        "h": 9,
         "x": 0,
         "y": 50
       },
