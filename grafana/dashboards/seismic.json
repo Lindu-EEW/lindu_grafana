@@ -507,11 +507,11 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "#FF2B2B",
                 "value": null
               },
               {
-                "color": "green",
+                "color": "#00FF00",
                 "value": 1
               }
             ]
@@ -521,10 +521,7 @@
       },
       "options": {
         "view": {
-          "id": "auto",
-          "zoom": 10,
-          "lat": 35.6,
-          "lon": 139.6
+          "id": "fit"
         },
         "controls": {
           "mouseWheelZoom": true,
@@ -539,10 +536,11 @@
             "config": {
               "showLegend": true,
               "size": {
-                "fixed": 12
+                "fixed": 25
               },
               "color": {
-                "field": "metric"
+                "field": "metric",
+                "fixed": "dark-green"
               },
               "symbol": {
                 "fixed": "img/icons/marker/circle.svg"
