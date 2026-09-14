@@ -565,7 +565,7 @@
           }
         ],
         "basemap": {
-          "type": "osm",
+          "type": "arcgis",
           "name": "Layer 0"
         }
       },
