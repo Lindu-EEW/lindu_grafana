@@ -539,7 +539,7 @@
             "config": {
               "showLegend": true,
               "size": {
-                "fixed": 15
+                "fixed": 12
               },
               "color": {
                 "field": "metric"
@@ -556,15 +556,14 @@
               }
             },
             "location": {
-              "mode": "auto"
+              "mode": "coords",
+              "latitude": "latitude",
+              "longitude": "longitude"
             }
           }
         ],
         "basemap": {
-          "type": "carto",
-          "config": {
-            "theme": "dark"
-          },
+          "type": "default",
           "name": "Layer 0"
         }
       },
