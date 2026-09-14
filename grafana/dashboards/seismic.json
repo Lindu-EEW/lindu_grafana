@@ -525,7 +525,10 @@
       },
       "options": {
         "view": {
-          "id": "fit"
+          "id": "zero",
+          "lat": 35.6,
+          "lon": 139.6,
+          "zoom": 10
         },
         "controls": {
           "mouseWheelZoom": true,
