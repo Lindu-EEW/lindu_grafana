@@ -283,9 +283,7 @@
           "custom": {
             "lineWidth": 2
           },
-          "unit": "pressurehpa",
-          "min": 980,
-          "max": 1030
+          "unit": "pressurehpa"
         },
         "overrides": []
       },
