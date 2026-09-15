@@ -24,3 +24,12 @@ CREATE TABLE IF NOT EXISTS sensor_status (
     fw_version  VARCHAR(50),
     ota_status  VARCHAR(50)
 );
+
+-- Lokasi node terakhir yang diketahui (dipakai panel peta "Live Seismic Map").
+-- Di-upsert oleh ingester setiap kali menerima pesan status dari node.
+CREATE TABLE IF NOT EXISTS tb_nodes (
+    node_id    VARCHAR(50) PRIMARY KEY,
+    lat        DOUBLE PRECISION,
+    lon        DOUBLE PRECISION,
+    updated_at TIMESTAMP WITH TIME ZONE
+);
