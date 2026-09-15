@@ -1,16 +1,16 @@
 CREATE TABLE IF NOT EXISTS sensor_telemetry (
-    time        TIMESTAMP WITH TIME ZONE NOT NULL,
-    node_id     VARCHAR(50) NOT NULL,
-    pga         DOUBLE PRECISION,
-    rms         DOUBLE PRECISION,
-    accel_x     DOUBLE PRECISION,
-    accel_y     DOUBLE PRECISION,
-    accel_z     DOUBLE PRECISION,
-    temperature DOUBLE PRECISION,
-    pressure    DOUBLE PRECISION,
-    humidity    DOUBLE PRECISION,
-    latency_ms  DOUBLE PRECISION,
-    sensor_ok   BOOLEAN
+    time         TIMESTAMP WITH TIME ZONE NOT NULL,
+    node_id      VARCHAR(50) NOT NULL,
+    pga          DOUBLE PRECISION,
+    rms          DOUBLE PRECISION,
+    accel_x      DOUBLE PRECISION,
+    accel_y      DOUBLE PRECISION,
+    accel_z      DOUBLE PRECISION,
+    temperature  DOUBLE PRECISION,
+    pressure     DOUBLE PRECISION,
+    humidity     DOUBLE PRECISION,
+    latency_ms   DOUBLE PRECISION,
+    valve_status VARCHAR(20)
 );
 
 CREATE TABLE IF NOT EXISTS sensor_status (
@@ -20,5 +20,7 @@ CREATE TABLE IF NOT EXISTS sensor_status (
     pose        VARCHAR(20),
     tilt_angle  DOUBLE PRECISION,
     latency_ms  DOUBLE PRECISION,
-    sensor_ok   BOOLEAN
+    sensor_ok   BOOLEAN,
+    fw_version  VARCHAR(50),
+    ota_status  VARCHAR(50)
 );
