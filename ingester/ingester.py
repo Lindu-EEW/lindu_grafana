@@ -150,6 +150,8 @@ def send_cmd():
         if cmd == "set_location":
             payload["lat"] = float(data.get("lat", 0.0))
             payload["lon"] = float(data.get("lon", 0.0))
+        elif cmd == "set_broker":
+            payload["server"] = data.get("server", "192.168.68.105")
         client.publish("lindu/actuator/cmd/all", json.dumps(payload))
         return jsonify({"status": "success"})
     except Exception as e:
