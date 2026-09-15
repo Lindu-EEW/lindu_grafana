@@ -248,9 +248,7 @@
           "custom": {
             "lineWidth": 2
           },
-          "unit": "celsius",
-          "min": 15,
-          "max": 45
+          "unit": "celsius"
         },
         "overrides": []
       },
