@@ -24,19 +24,22 @@ cursor = conn.cursor()
 # Buffer antrean untuk Batch Insert (Sangat Efisien)
 telemetry_buffer = []
 status_buffer = []
+node_location_buffer = {}  # node_id -> (lat, lon, updated_at); dict agar hanya simpan lokasi terbaru per node
 buffer_lock = threading.Lock()
 
 def db_writer_thread():
-    global telemetry_buffer, status_buffer
+    global telemetry_buffer, status_buffer, node_location_buffer
     while True:
         time.sleep(0.5) # Flush ke database setiap 0.5 detik
-        
+
         with buffer_lock:
             local_telemetry = telemetry_buffer[:]
             local_status = status_buffer[:]
+            local_locations = list(node_location_buffer.items())
             telemetry_buffer.clear()
             status_buffer.clear()
-            
+            node_location_buffer.clear()
+
         if local_telemetry:
             try:
                 cursor.executemany(
@@ -57,6 +60,18 @@ def db_writer_thread():
                 conn.commit()
             except Exception as e:
                 print(f"Error Batch Status: {e}")
+                conn.rollback()
+
+        if local_locations:
+            try:
+                cursor.executemany(
+                    """INSERT INTO tb_nodes (node_id, lat, lon, updated_at) VALUES (%s, %s, %s, %s)
+                       ON CONFLICT (node_id) DO UPDATE SET lat = EXCLUDED.lat, lon = EXCLUDED.lon, updated_at = EXCLUDED.updated_at""",
+                    [(node_id, lat, lon, ts) for node_id, (lat, lon, ts) in local_locations]
+                )
+                conn.commit()
+            except Exception as e:
+                print(f"Error Batch Node Location: {e}")
                 conn.rollback()
 
 threading.Thread(target=db_writer_thread, daemon=True).start()
@@ -113,8 +128,14 @@ def on_message(client, userdata, msg):
             sensor_ok = payload.get("sensor_ok", False)
             fw_version = payload.get("fw_version", "UNKNOWN")
             ota_status = payload.get("ota_status", "IDLE")
+
+            lat = payload.get("lat", None)
+            lon = payload.get("lon", None)
+
             with buffer_lock:
                 status_buffer.append((now, node_id, status, pose, tilt, latency, sensor_ok, fw_version, ota_status))
+                if lat is not None and lon is not None and (lat != 0.0 or lon != 0.0):
+                    node_location_buffer[node_id] = (lat, lon, now)
     except Exception as e:
         print(f"Error: {e}")
 
