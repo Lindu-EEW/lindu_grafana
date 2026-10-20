@@ -24,33 +24,47 @@ cursor = conn.cursor()
 # Buffer antrean untuk Batch Insert (Sangat Efisien)
 telemetry_buffer = []
 status_buffer = []
+actuator_buffer = []
 node_location_buffer = {}  # node_id -> (lat, lon, updated_at); dict agar hanya simpan lokasi terbaru per node
 buffer_lock = threading.Lock()
 
 def db_writer_thread():
-    global telemetry_buffer, status_buffer, node_location_buffer
+    global telemetry_buffer, status_buffer, actuator_buffer, node_location_buffer
     while True:
         time.sleep(0.5) # Flush ke database setiap 0.5 detik
 
         with buffer_lock:
             local_telemetry = telemetry_buffer[:]
             local_status = status_buffer[:]
+            local_actuator = actuator_buffer[:]
             local_locations = list(node_location_buffer.items())
             telemetry_buffer.clear()
             status_buffer.clear()
+            actuator_buffer.clear()
             node_location_buffer.clear()
 
         if local_telemetry:
             try:
                 cursor.executemany(
-                    "INSERT INTO sensor_telemetry (time, node_id, pga, rms, accel_x, accel_y, accel_z, temperature, pressure, humidity, latency_ms, valve_status, gas_raw, gas_alert) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                    "INSERT INTO sensor_telemetry (time, node_id, pga, rms, accel_x, accel_y, accel_z, temperature, pressure, humidity, latency_ms, valve_status, gas_raw, gas_alert, door_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                     local_telemetry
                 )
                 conn.commit()
             except Exception as e:
                 print(f"Error Batch Telemetry: {e}")
                 conn.rollback()
-                
+
+        if local_actuator:
+            try:
+                cursor.executemany(
+                    "INSERT INTO actuator_log (time, node_id, actuator, state, reason) VALUES (%s, %s, %s, %s, %s)",
+                    local_actuator
+                )
+                conn.commit()
+            except Exception as e:
+                print(f"Error Batch Actuator: {e}")
+                conn.rollback()
+
         if local_status:
             try:
                 cursor.executemany(
@@ -103,7 +117,7 @@ def on_message(client, userdata, msg):
             valve = payload.get("valve_status", "UNKNOWN")
             gas_raw = payload.get("gas_raw", None)
             gas_alert = payload.get("gas_alert", None)
-
+            door = payload.get("door_status", None)
 
             # Calculate Latency (if ESP32 sends its NTP synced epoch timestamp)
             sent_ts = payload.get("ts", payload.get("timestamp", None))
@@ -112,8 +126,13 @@ def on_message(client, userdata, msg):
                 latency = (time.time() - sent_ts) * 1000.0 # Convert to milliseconds
 
             with buffer_lock:
-                telemetry_buffer.append((now, node_id, pga, rms, ax, ay, az, temp, press, hum, latency, valve, gas_raw, gas_alert))
-            
+                telemetry_buffer.append((now, node_id, pga, rms, ax, ay, az, temp, press, hum, latency, valve, gas_raw, gas_alert, door))
+
+        elif topic.endswith("/actuator"):
+            node_id = payload.get("node_id", topic.split("/")[2])
+            with buffer_lock:
+                actuator_buffer.append((now, node_id, payload.get("actuator", "unknown"), payload.get("state", "unknown"), payload.get("reason", None)))
+
         elif topic.endswith("/status"):
             node_id = payload.get("node_id", "unknown")
             status = payload.get("status", "unknown")
