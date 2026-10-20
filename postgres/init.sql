@@ -21,6 +21,20 @@ CREATE TABLE IF NOT EXISTS sensor_telemetry (
 ALTER TABLE sensor_telemetry ADD COLUMN IF NOT EXISTS gas_raw INTEGER;
 ALTER TABLE sensor_telemetry ADD COLUMN IF NOT EXISTS gas_alert BOOLEAN;
 
+-- Status solenoid door lock (LOCKED/UNLOCKED; UNAVAILABLE di node tanpa door lock).
+ALTER TABLE sensor_telemetry ADD COLUMN IF NOT EXISTS door_status VARCHAR(20);
+
+-- Log event aktuator: satu baris tiap aktuator berubah state (valve, door, buzzer, led).
+-- reason diisi firmware secara inferensi dari kondisi saat perubahan terjadi.
+CREATE TABLE IF NOT EXISTS actuator_log (
+    time     TIMESTAMP WITH TIME ZONE NOT NULL,
+    node_id  VARCHAR(50) NOT NULL,
+    actuator VARCHAR(20) NOT NULL,
+    state    VARCHAR(30) NOT NULL,
+    reason   VARCHAR(40)
+);
+CREATE INDEX IF NOT EXISTS actuator_log_time_idx ON actuator_log (time DESC);
+
 CREATE TABLE IF NOT EXISTS sensor_status (
     time            TIMESTAMP WITH TIME ZONE NOT NULL,
     node_id         VARCHAR(50) NOT NULL,
