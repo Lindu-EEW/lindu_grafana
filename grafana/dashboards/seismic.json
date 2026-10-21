@@ -8,7 +8,7 @@
   "panels": [
     {
       "type": "table",
-      "title": "\ud83d\udce1 Live Fleet Status (Online / Offline)",
+      "title": "📡 Live Fleet Status (Online / Offline)",
       "gridPos": {
         "w": 18,
         "h": 5,
@@ -59,12 +59,12 @@
                       "OFFLINE": {
                         "color": "red",
                         "index": 0,
-                        "text": "\ud83d\udd34 OFFLINE"
+                        "text": "🔴 OFFLINE"
                       },
                       "ONLINE": {
                         "color": "green",
                         "index": 1,
-                        "text": "\ud83d\udfe2 ONLINE"
+                        "text": "🟢 ONLINE"
                       }
                     }
                   }
@@ -151,7 +151,7 @@
       "targets": [
         {
           "refId": "A",
-          "rawSql": "\nSELECT \n  time AS \"time\", \n  node_id AS \"metric\",\n  pga AS \"Total Guncangan (PGA)\"\nFROM sensor_telemetry \nWHERE node_id IN ($node_id) AND time > NOW() - INTERVAL '15 minutes' \nORDER BY time ASC\n",
+          "rawSql": "SELECT $__timeGroupAlias(time,$__interval), node_id AS \"metric\", max(pga) AS \"Total Guncangan (PGA)\" FROM sensor_telemetry WHERE $__timeFilter(time) AND node_id IN ($node_id) GROUP BY 1,2 ORDER BY 1",
           "format": "time_series",
           "datasource": {
             "type": "grafana-postgresql-datasource",
@@ -200,7 +200,7 @@
       "targets": [
         {
           "refId": "A",
-          "rawSql": "\nSELECT \n  time AS \"time\", \n  node_id AS \"metric\",\n  rms AS \"STA/LTA Ratio\" \nFROM sensor_telemetry \nWHERE node_id IN ($node_id) AND time > NOW() - INTERVAL '15 minutes' \nORDER BY time ASC\n",
+          "rawSql": "SELECT $__timeGroupAlias(time,$__interval), node_id AS \"metric\", avg(rms) AS \"STA/LTA Ratio\" FROM sensor_telemetry WHERE $__timeFilter(time) AND node_id IN ($node_id) GROUP BY 1,2 ORDER BY 1",
           "format": "time_series",
           "datasource": {
             "type": "grafana-postgresql-datasource",
@@ -230,7 +230,7 @@
     },
     {
       "type": "timeseries",
-      "title": "Temperature (\u00b0C)",
+      "title": "Temperature (°C)",
       "gridPos": {
         "w": 12,
         "h": 8,
@@ -240,7 +240,7 @@
       "targets": [
         {
           "refId": "A",
-          "rawSql": "SELECT time, node_id, temperature AS \"Temperature (\u00b0C)\" FROM sensor_telemetry WHERE node_id IN ($node_id) AND time > NOW() - INTERVAL '15 minutes' AND temperature IS NOT NULL ORDER BY time ASC",
+          "rawSql": "SELECT $__timeGroupAlias(time,$__interval), node_id AS \"node_id\", avg(temperature) AS \"Temperature (°C)\" FROM sensor_telemetry WHERE $__timeFilter(time) AND node_id IN ($node_id) AND temperature IS NOT NULL GROUP BY 1,2 ORDER BY 1",
           "format": "time_series",
           "datasource": {
             "type": "grafana-postgresql-datasource",
@@ -278,7 +278,7 @@
       "targets": [
         {
           "refId": "A",
-          "rawSql": "SELECT time, node_id, pressure AS \"Pressure (hPa)\" FROM sensor_telemetry WHERE node_id IN ($node_id) AND time > NOW() - INTERVAL '15 minutes' AND pressure IS NOT NULL ORDER BY time ASC",
+          "rawSql": "SELECT $__timeGroupAlias(time,$__interval), node_id AS \"node_id\", avg(pressure) AS \"Pressure (hPa)\" FROM sensor_telemetry WHERE $__timeFilter(time) AND node_id IN ($node_id) AND pressure IS NOT NULL GROUP BY 1,2 ORDER BY 1",
           "format": "time_series",
           "datasource": {
             "type": "grafana-postgresql-datasource",
@@ -356,7 +356,7 @@
       "targets": [
         {
           "refId": "A",
-          "rawSql": "SELECT time, node_id AS metric, latency_ms AS value FROM sensor_telemetry WHERE node_id IN ($node_id) AND time > NOW() - INTERVAL '15 minutes' AND latency_ms IS NOT NULL ORDER BY time ASC",
+          "rawSql": "SELECT $__timeGroupAlias(time,$__interval), node_id AS \"metric\", avg(latency_ms) AS \"value\" FROM sensor_telemetry WHERE $__timeFilter(time) AND node_id IN ($node_id) AND latency_ms IS NOT NULL GROUP BY 1,2 ORDER BY 1",
           "format": "time_series",
           "datasource": {
             "type": "grafana-postgresql-datasource",
@@ -404,7 +404,7 @@
     },
     {
       "type": "table",
-      "title": "\ud83d\udea8 Log Gempa Tervalidasi (Konsensus Multi-Node)",
+      "title": "🚨 Log Gempa Tervalidasi (Konsensus Multi-Node)",
       "gridPos": {
         "w": 24,
         "h": 8,
@@ -414,7 +414,7 @@
       "targets": [
         {
           "refId": "A",
-          "rawSql": "SELECT \n  time_alert AT TIME ZONE 'Asia/Tokyo' AS \"Waktu Gempa (JST)\", \n  magnitude AS \"Magnitudo\", \n  CASE \n    WHEN magnitude >= 7.0 THEN '\ud83d\udd34 Dahsyat'\n    WHEN magnitude >= 6.0 THEN '\ud83d\udfe0 Kuat' \n    WHEN magnitude >= 5.0 THEN '\ud83d\udfe1 Sedang'\n    ELSE '\ud83d\udfe2 Ringan'\n  END AS \"Klasifikasi\",\n  radius_km AS \"Radius (km)\", \n  COALESCE(jsonb_array_length(triggering_nodes), 0) AS \"Jumlah Node\",\n  description AS \"Detail Analisis\" \nFROM tb_system_alerts \nORDER BY time_alert DESC LIMIT 20",
+          "rawSql": "SELECT \n  time_alert AT TIME ZONE 'Asia/Tokyo' AS \"Waktu Gempa (JST)\", \n  magnitude AS \"Magnitudo\", \n  CASE \n    WHEN magnitude >= 7.0 THEN '🔴 Dahsyat'\n    WHEN magnitude >= 6.0 THEN '🟠 Kuat' \n    WHEN magnitude >= 5.0 THEN '🟡 Sedang'\n    ELSE '🟢 Ringan'\n  END AS \"Klasifikasi\",\n  radius_km AS \"Radius (km)\", \n  COALESCE(jsonb_array_length(triggering_nodes), 0) AS \"Jumlah Node\",\n  description AS \"Detail Analisis\" \nFROM tb_system_alerts \nORDER BY time_alert DESC LIMIT 20",
           "format": "table",
           "datasource": {
             "type": "grafana-postgresql-datasource",
@@ -488,7 +488,7 @@
     },
     {
       "type": "gauge",
-      "title": "\ud83c\udf0a PGA Terkini (Peak Ground Acceleration)",
+      "title": "🌊 PGA Terkini (Peak Ground Acceleration)",
       "id": 20,
       "gridPos": {
         "w": 12,
@@ -555,7 +555,7 @@
     },
     {
       "type": "timeseries",
-      "title": "\ud83c\udfb5 Frekuensi Dominan (Hz) \u2014 Gempa < 15Hz, Noise > 20Hz",
+      "title": "🎵 Frekuensi Dominan (Hz) — Gempa < 15Hz, Noise > 20Hz",
       "id": 21,
       "gridPos": {
         "w": 12,
@@ -618,7 +618,7 @@
     },
     {
       "type": "stat",
-      "title": "\ud83d\udda5\ufe0f Lindu Backend (Host Health)",
+      "title": "🖥️ Lindu Backend (Host Health)",
       "id": 22,
       "gridPos": {
         "w": 10,
@@ -677,7 +677,7 @@
     },
     {
       "type": "table",
-      "title": "\ud83d\udccb Remote Serial Monitor (Internal ESP32 Logs) - $node_id",
+      "title": "📋 Remote Serial Monitor (Internal ESP32 Logs) - $node_id",
       "id": 23,
       "gridPos": {
         "w": 24,
@@ -703,7 +703,7 @@
     },
     {
       "type": "stat",
-      "title": "\ud83d\udeb6 PIR Motion (Terkini)",
+      "title": "🚶 PIR Motion (Terkini)",
       "id": 24,
       "gridPos": {
         "w": 6,
@@ -733,12 +733,12 @@
               "type": "value",
               "options": {
                 "TERDETEKSI": {
-                  "text": "\ud83d\udfe2 TERDETEKSI",
+                  "text": "🟢 TERDETEKSI",
                   "color": "green",
                   "index": 1
                 },
                 "TIDAK ADA GERAKAN": {
-                  "text": "\u26aa TIDAK ADA GERAKAN",
+                  "text": "⚪ TIDAK ADA GERAKAN",
                   "color": "text",
                   "index": 0
                 }
@@ -791,7 +791,7 @@
     },
     {
       "type": "state-timeline",
-      "title": "\ud83d\udeb6 Riwayat Deteksi PIR",
+      "title": "🚶 Riwayat Deteksi PIR",
       "id": 25,
       "gridPos": {
         "w": 6,
@@ -807,7 +807,7 @@
         {
           "refId": "A",
           "format": "time_series",
-          "rawSql": "SELECT time AS \"time\", node_id AS \"metric\", CASE WHEN motion_detected THEN 'Gerakan' ELSE 'Diam' END AS \"PIR\" FROM sensor_status WHERE node_id IN ($node_id) AND motion_detected IS NOT NULL AND time > NOW() - INTERVAL '15 minutes' ORDER BY time ASC",
+          "rawSql": "SELECT time AS \"time\", node_id AS \"metric\", CASE WHEN motion_detected THEN 'Gerakan' ELSE 'Diam' END AS \"PIR\" FROM sensor_status WHERE node_id IN ($node_id) AND motion_detected IS NOT NULL AND $__timeFilter(time) ORDER BY time ASC",
           "datasource": {
             "type": "grafana-postgresql-datasource",
             "uid": "lindu_pg"
@@ -848,7 +848,7 @@
     },
     {
       "type": "timeseries",
-      "title": "\ud83d\udca8 Konsentrasi Gas (MQ-2)",
+      "title": "💨 Konsentrasi Gas (MQ-2)",
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -865,7 +865,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT time AS \"time\", node_id AS \"metric\", gas_raw AS \"Gas Level (Raw)\" FROM sensor_telemetry WHERE node_id IN ($node_id) AND time > NOW() - INTERVAL '15 minutes' ORDER BY time ASC",
+          "rawSql": "SELECT $__timeGroupAlias(time,$__interval), node_id AS \"metric\", avg(gas_raw) AS \"Gas Level (Raw)\" FROM sensor_telemetry WHERE $__timeFilter(time) AND node_id IN ($node_id) GROUP BY 1,2 ORDER BY 1",
           "refId": "A"
         }
       ],
@@ -913,7 +913,7 @@
     },
     {
       "id": 27,
-      "title": "\ud83e\udd16 TinyML Shadow Mode: Probabilitas Gempa vs Algoritma Klasik (%)",
+      "title": "🤖 TinyML Shadow Mode: Probabilitas Gempa vs Algoritma Klasik (%)",
       "type": "timeseries",
       "datasource": {
         "type": "grafana-postgresql-datasource",
@@ -980,6 +980,83 @@
           "showLegend": true
         }
       }
+    },
+    {
+      "id": 30,
+      "type": "table",
+      "title": "📜 Log Aktuator (Valve / Door / Buzzer / LED)",
+      "gridPos": {
+        "w": 24,
+        "h": 8,
+        "x": 0,
+        "y": 47
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "lindu_pg"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "lindu_pg"
+          },
+          "rawSql": "SELECT time AS \"Waktu\", node_id AS \"Node\", actuator AS \"Aktuator\", state AS \"State\", reason AS \"Alasan\" FROM actuator_log WHERE $__timeFilter(time) AND node_id IN ($node_id) AND actuator IN ($actuator) AND state IN ($act_state) AND COALESCE(reason,'') IN ($act_reason) ORDER BY time DESC LIMIT 500"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Waktu",
+            "desc": true
+          }
+        ]
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 31,
+      "type": "state-timeline",
+      "title": "📊 Riwayat State Aktuator",
+      "gridPos": {
+        "w": 24,
+        "h": 8,
+        "x": 0,
+        "y": 55
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "lindu_pg"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "lindu_pg"
+          },
+          "rawSql": "SELECT time AS \"time\", node_id || ' / ' || actuator AS \"metric\", state AS \"state\" FROM actuator_log WHERE $__timeFilter(time) AND node_id IN ($node_id) AND actuator IN ($actuator) AND state IN ($act_state) AND COALESCE(reason,'') IN ($act_reason) ORDER BY time ASC"
+        }
+      ],
+      "options": {
+        "showValue": "auto",
+        "mergeValues": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      }
     }
   ],
   "refresh": "5s",
@@ -998,13 +1075,76 @@
         "definition": "SELECT DISTINCT node_id FROM tb_nodes",
         "hide": 0,
         "includeAll": true,
-        "label": "\ud83d\udd0d Pilih Node untuk Diinspeksi",
+        "label": "🔍 Pilih Node untuk Diinspeksi",
         "multi": true,
         "name": "node_id",
         "options": [],
         "query": "SELECT DISTINCT node_id FROM tb_nodes",
         "refresh": 1,
         "type": "query"
+      },
+      {
+        "name": "actuator",
+        "label": "⚙️ Aktuator",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "lindu_pg"
+        },
+        "definition": "SELECT DISTINCT actuator FROM actuator_log WHERE actuator IS NOT NULL ORDER BY 1",
+        "query": "SELECT DISTINCT actuator FROM actuator_log WHERE actuator IS NOT NULL ORDER BY 1",
+        "includeAll": true,
+        "multi": true,
+        "refresh": 2,
+        "hide": 0,
+        "options": [],
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        }
+      },
+      {
+        "name": "act_state",
+        "label": "🔘 State",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "lindu_pg"
+        },
+        "definition": "SELECT DISTINCT state FROM actuator_log WHERE state IS NOT NULL ORDER BY 1",
+        "query": "SELECT DISTINCT state FROM actuator_log WHERE state IS NOT NULL ORDER BY 1",
+        "includeAll": true,
+        "multi": true,
+        "refresh": 2,
+        "hide": 0,
+        "options": [],
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        }
+      },
+      {
+        "name": "act_reason",
+        "label": "❓ Alasan",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "lindu_pg"
+        },
+        "definition": "SELECT DISTINCT COALESCE(reason, '') FROM actuator_log ORDER BY 1",
+        "query": "SELECT DISTINCT COALESCE(reason, '') FROM actuator_log ORDER BY 1",
+        "includeAll": true,
+        "multi": true,
+        "refresh": 2,
+        "hide": 0,
+        "options": [],
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        }
       }
     ]
   },
@@ -1023,6 +1163,6 @@
       "1d"
     ]
   },
-  "version": 4,
+  "version": 6,
   "uid": "b0619202-bdfa-49ef-801d-70b3d143c357"
 }
