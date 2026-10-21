@@ -87,7 +87,7 @@
     },
     {
       "type": "stat",
-      "title": "Active Nodes (Last 5 Min)",
+      "title": "Active Nodes (Last 1 Min)",
       "gridPos": {
         "w": 6,
         "h": 5,
@@ -97,7 +97,7 @@
       "targets": [
         {
           "refId": "A",
-          "rawSql": "SELECT count(DISTINCT node_id) as count FROM sensor_telemetry WHERE node_id IN ($node_id) AND time > NOW() - INTERVAL '5 minutes'",
+          "rawSql": "SELECT count(DISTINCT node_id) AS count FROM sensor_status WHERE node_id IN ($node_id) AND status <> 'offline' AND time > NOW() - INTERVAL '1 minute'",
           "format": "table",
           "datasource": {
             "type": "grafana-postgresql-datasource",
@@ -141,7 +141,7 @@
     },
     {
       "type": "timeseries",
-      "title": "Grafik Seismogram Live (Total Guncangan 3D) — Tenang < 0.004g, Gempa Mikro >= 0.004g, Terasa >= 0.05g",
+      "title": "Grafik Seismogram Live (PGA)",
       "gridPos": {
         "w": 12,
         "h": 8,
@@ -166,14 +166,15 @@
           "softMax": 0.05,
           "custom": {
             "drawStyle": "line",
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
             "fillOpacity": 10,
             "thresholdsStyle": {
               "mode": "line"
             },
-            "spanNulls": true,
-            "showPoints": "never"
+            "spanNulls": 1500,
+            "showPoints": "auto",
+            "pointSize": 3
           },
           "thresholds": {
             "mode": "absolute",
@@ -201,18 +202,23 @@
       },
       "options": {
         "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "max",
+            "lastNotNull"
+          ]
         },
         "tooltip": {
           "mode": "single"
         }
       },
-      "id": 2
+      "id": 2,
+      "description": "Tenang < 0.004g · Gempa Mikro >= 0.004g · Terasa >= 0.05g. Titik muncul hanya saat node mendeteksi getaran."
     },
     {
       "type": "timeseries",
-      "title": "Rasio Validasi Gempa (STA / LTA) — Normal ~1.0, Gempa Mikro >= 1.5, Gempa Kuat >= 2.0",
+      "title": "Rasio STA/LTA (Trigger)",
       "gridPos": {
         "w": 12,
         "h": 8,
@@ -222,7 +228,7 @@
       "targets": [
         {
           "refId": "A",
-          "rawSql": "SELECT $__timeGroupAlias(ts,$__interval), node_id AS \"metric\", avg(sta_lta) AS \"STA/LTA Ratio\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) GROUP BY 1,2 ORDER BY 1",
+          "rawSql": "SELECT ts AS time, node_id AS metric, sta_lta AS \"STA/LTA\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) ORDER BY ts",
           "format": "time_series",
           "datasource": {
             "type": "grafana-postgresql-datasource",
@@ -234,18 +240,19 @@
         "defaults": {
           "unit": "none",
           "min": 0,
-          "softMax": 3,
+          "softMax": 4,
           "custom": {
-            "fillOpacity": 15,
+            "fillOpacity": 8,
             "lineWidth": 2,
-            "gradientMode": "scheme",
+            "gradientMode": "none",
             "thresholdsStyle": {
-              "mode": "line+area"
+              "mode": "dashed"
             },
             "drawStyle": "line",
-            "lineInterpolation": "smooth",
-            "showPoints": "never",
-            "spanNulls": true
+            "lineInterpolation": "linear",
+            "showPoints": "always",
+            "spanNulls": 1500,
+            "pointSize": 5
           },
           "thresholds": {
             "mode": "absolute",
@@ -263,6 +270,10 @@
                 "value": 2.0
               }
             ]
+          },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#5794F2"
           }
         }
       },
@@ -272,14 +283,20 @@
       },
       "options": {
         "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "max",
+            "lastNotNull"
+          ]
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "multi",
+          "sort": "desc"
         }
       },
-      "id": 3
+      "id": 3,
+      "description": "Tenang ~1.0 · Gempa Mikro >= 1.5 · Gempa Kuat >= 2.0. Titik muncul hanya saat node mendeteksi getaran."
     },
     {
       "type": "timeseries",
@@ -497,7 +514,7 @@
       "targets": [
         {
           "format": "table",
-          "rawSql": "SELECT DISTINCT ON (node_id) time, node_id, valve_status FROM sensor_telemetry WHERE node_id IN ($node_id) AND time >= NOW() - INTERVAL '1 minute' AND valve_status IS NOT NULL ORDER BY node_id, time DESC;",
+          "rawSql": "SELECT DISTINCT ON (node_id) time, node_id, state AS valve_status FROM actuator_log WHERE node_id IN ($node_id) AND actuator = 'valve' ORDER BY node_id, time DESC",
           "refId": "A",
           "datasource": {
             "type": "grafana-postgresql-datasource",
@@ -1110,6 +1127,72 @@
         },
         "overrides": []
       }
+    },
+    {
+      "id": 32,
+      "type": "state-timeline",
+      "title": "🌐 Timeline Deteksi Gempa (hanya saat ada getaran)",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "lindu_pg"
+      },
+      "gridPos": {
+        "w": 24,
+        "h": 5,
+        "x": 0,
+        "y": 13
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "lindu_pg"
+          },
+          "rawSql": "SELECT ts AS \"time\", node_id AS \"metric\", CASE WHEN pga >= 0.05 AND sta_lta >= 2.0 THEN 'Gempa Kuat' WHEN pga >= 0.004 AND sta_lta >= 1.5 THEN 'Gempa Mikro' ELSE 'Getaran Lemah' END AS \"Status\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) ORDER BY ts"
+        }
+      ],
+      "options": {
+        "showValue": "auto",
+        "mergeValues": true,
+        "rowHeight": 0.8,
+        "legend": {
+          "showLegend": true,
+          "placement": "bottom"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed"
+          },
+          "custom": {
+            "fillOpacity": 80,
+            "lineWidth": 0
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "Gempa Kuat": {
+                  "color": "red",
+                  "index": 0
+                },
+                "Gempa Mikro": {
+                  "color": "orange",
+                  "index": 1
+                },
+                "Getaran Lemah": {
+                  "color": "green",
+                  "index": 2
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      }
     }
   ],
   "refresh": "5s",
@@ -1216,6 +1299,6 @@
       "1d"
     ]
   },
-  "version": 7,
+  "version": 9,
   "uid": "b0619202-bdfa-49ef-801d-70b3d143c357"
 }
