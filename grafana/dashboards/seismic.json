@@ -928,7 +928,7 @@
       "targets": [
         {
           "refId": "A",
-          "rawSql": "SELECT \n  time AS \"time\", \n  node_id AS \"metric\",\n  COALESCE(ml_prob * 100.0, 0.0) AS \"TinyML Confidence (%)\" \nFROM sensor_telemetry \nWHERE node_id IN () AND time > NOW() - INTERVAL '15 minutes' \nORDER BY time ASC",
+          "rawSql": "SELECT $__timeGroupAlias(time,$__interval), node_id AS \"metric\", avg(ml_prob) * 100.0 AS \"TinyML Confidence (%)\" FROM sensor_telemetry WHERE $__timeFilter(time) AND node_id IN ($node_id) AND ml_prob IS NOT NULL GROUP BY 1,2 ORDER BY 1",
           "format": "time_series",
           "datasource": {
             "type": "grafana-postgresql-datasource",
@@ -1163,6 +1163,6 @@
       "1d"
     ]
   },
-  "version": 6,
+  "version": 7,
   "uid": "b0619202-bdfa-49ef-801d-70b3d143c357"
 }

@@ -24,6 +24,10 @@ ALTER TABLE sensor_telemetry ADD COLUMN IF NOT EXISTS gas_alert BOOLEAN;
 -- Status solenoid door lock (LOCKED/UNLOCKED; UNAVAILABLE di node tanpa door lock).
 ALTER TABLE sensor_telemetry ADD COLUMN IF NOT EXISTS door_status VARCHAR(20);
 
+-- TinyML shadow mode: probabilitas gempa dari firmware (0.0-1.0) dan kesepakatan dengan algoritma klasik.
+ALTER TABLE sensor_telemetry ADD COLUMN IF NOT EXISTS ml_prob DOUBLE PRECISION DEFAULT 0.0;
+ALTER TABLE sensor_telemetry ADD COLUMN IF NOT EXISTS ml_agree BOOLEAN DEFAULT TRUE;
+
 -- Log event aktuator: satu baris tiap aktuator berubah state (valve, door, buzzer, led).
 -- reason diisi firmware secara inferensi dari kondisi saat perubahan terjadi.
 CREATE TABLE IF NOT EXISTS actuator_log (
@@ -60,3 +64,25 @@ CREATE TABLE IF NOT EXISTS tb_nodes (
     lon        DOUBLE PRECISION,
     updated_at TIMESTAMP WITH TIME ZONE
 );
+
+-- Telemetri streaming per detik (freq_hz, sta_lta, uptime). Dipakai panel "Frekuensi Dominan" dan gauge PGA.
+CREATE TABLE IF NOT EXISTS tb_sensor_telemetry (
+    ts           TIMESTAMP(3) WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    node_id      VARCHAR(32),
+    pga          DOUBLE PRECISION,
+    sta_lta      DOUBLE PRECISION,
+    freq_hz      INTEGER,
+    ax           DOUBLE PRECISION,
+    ay           DOUBLE PRECISION,
+    az           DOUBLE PRECISION,
+    lat          DOUBLE PRECISION,
+    lon          DOUBLE PRECISION,
+    uptime_ms    BIGINT,
+    gas_raw      INTEGER,
+    gas_alert    BOOLEAN,
+    door_status  VARCHAR(16),
+    valve_status VARCHAR(16),
+    ml_prob      DOUBLE PRECISION DEFAULT 0.0,
+    ml_agree     BOOLEAN DEFAULT TRUE
+);
+CREATE INDEX IF NOT EXISTS idx_tb_sensor_telemetry_ts_node ON tb_sensor_telemetry (ts DESC, node_id);

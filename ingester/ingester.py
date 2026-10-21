@@ -23,22 +23,25 @@ cursor = conn.cursor()
 
 # Buffer antrean untuk Batch Insert (Sangat Efisien)
 telemetry_buffer = []
+live_telemetry_buffer = []  # tb_sensor_telemetry: freq_hz/sta_lta untuk panel Frekuensi Dominan & gauge PGA
 status_buffer = []
 actuator_buffer = []
 node_location_buffer = {}  # node_id -> (lat, lon, updated_at); dict agar hanya simpan lokasi terbaru per node
 buffer_lock = threading.Lock()
 
 def db_writer_thread():
-    global telemetry_buffer, status_buffer, actuator_buffer, node_location_buffer
+    global telemetry_buffer, live_telemetry_buffer, status_buffer, actuator_buffer, node_location_buffer
     while True:
         time.sleep(0.5) # Flush ke database setiap 0.5 detik
 
         with buffer_lock:
             local_telemetry = telemetry_buffer[:]
             local_status = status_buffer[:]
+            local_live = live_telemetry_buffer[:]
             local_actuator = actuator_buffer[:]
             local_locations = list(node_location_buffer.items())
             telemetry_buffer.clear()
+            live_telemetry_buffer.clear()
             status_buffer.clear()
             actuator_buffer.clear()
             node_location_buffer.clear()
@@ -46,12 +49,23 @@ def db_writer_thread():
         if local_telemetry:
             try:
                 cursor.executemany(
-                    "INSERT INTO sensor_telemetry (time, node_id, pga, rms, accel_x, accel_y, accel_z, temperature, pressure, humidity, latency_ms, valve_status, gas_raw, gas_alert, door_status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                    "INSERT INTO sensor_telemetry (time, node_id, pga, rms, accel_x, accel_y, accel_z, temperature, pressure, humidity, latency_ms, valve_status, gas_raw, gas_alert, door_status, ml_prob, ml_agree) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                     local_telemetry
                 )
                 conn.commit()
             except Exception as e:
                 print(f"Error Batch Telemetry: {e}")
+                conn.rollback()
+
+        if local_live:
+            try:
+                cursor.executemany(
+                    "INSERT INTO tb_sensor_telemetry (ts, node_id, pga, sta_lta, freq_hz, ax, ay, az, lat, lon, uptime_ms, gas_raw, gas_alert, door_status, valve_status, ml_prob, ml_agree) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                    local_live
+                )
+                conn.commit()
+            except Exception as e:
+                print(f"Error Batch Live Telemetry: {e}")
                 conn.rollback()
 
         if local_actuator:
@@ -119,6 +133,10 @@ def on_message(client, userdata, msg):
             gas_alert = payload.get("gas_alert", None)
             door = payload.get("door_status", None)
 
+            # TinyML shadow mode (probabilitas gempa 0.0-1.0 dan kesepakatan dengan algoritma klasik)
+            ml_prob = payload.get("ml_prob", payload.get("ml", None))
+            ml_agree = payload.get("ml_agree", payload.get("agree", None))
+
             # Calculate Latency (if ESP32 sends its NTP synced epoch timestamp)
             sent_ts = payload.get("ts", payload.get("timestamp", None))
             latency = None
@@ -126,7 +144,10 @@ def on_message(client, userdata, msg):
                 latency = (time.time() - sent_ts) * 1000.0 # Convert to milliseconds
 
             with buffer_lock:
-                telemetry_buffer.append((now, node_id, pga, rms, ax, ay, az, temp, press, hum, latency, valve, gas_raw, gas_alert, door))
+                telemetry_buffer.append((now, node_id, pga, rms, ax, ay, az, temp, press, hum, latency, valve, gas_raw, gas_alert, door, ml_prob, ml_agree))
+                live_telemetry_buffer.append((now, node_id, pga, payload.get("sta_lta", rms), payload.get("freq_hz", None), ax, ay, az,
+                                              payload.get("lat", None), payload.get("lon", None), payload.get("uptime", payload.get("uptime_ms", None)),
+                                              gas_raw, gas_alert, door, valve, ml_prob, ml_agree))
 
         elif topic.endswith("/actuator"):
             node_id = payload.get("node_id", topic.split("/")[2])
