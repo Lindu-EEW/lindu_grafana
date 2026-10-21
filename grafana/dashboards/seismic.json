@@ -141,7 +141,7 @@
     },
     {
       "type": "timeseries",
-      "title": "Grafik Seismogram Live (Total Guncangan 3D)",
+      "title": "Grafik Seismogram Live (Total Guncangan 3D) — Tenang < 0.004g, Gempa Mikro >= 0.004g, Terasa >= 0.05g",
       "gridPos": {
         "w": 12,
         "h": 8,
@@ -162,13 +162,35 @@
       "fieldConfig": {
         "defaults": {
           "unit": "g",
+          "min": 0,
+          "softMax": 0.05,
           "custom": {
             "drawStyle": "line",
             "lineInterpolation": "smooth",
             "lineWidth": 2,
             "fillOpacity": 10,
+            "thresholdsStyle": {
+              "mode": "line"
+            },
             "spanNulls": true,
             "showPoints": "never"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#73BF69",
+                "value": null
+              },
+              {
+                "color": "#FADE2A",
+                "value": 0.004
+              },
+              {
+                "color": "#F2495C",
+                "value": 0.05
+              }
+            ]
           }
         },
         "overrides": []
@@ -190,7 +212,7 @@
     },
     {
       "type": "timeseries",
-      "title": "Rasio Validasi Gempa (STA / LTA)",
+      "title": "Rasio Validasi Gempa (STA / LTA) — Normal ~1.0, Gempa Mikro >= 1.5, Gempa Kuat >= 2.0",
       "gridPos": {
         "w": 12,
         "h": 8,
@@ -200,7 +222,7 @@
       "targets": [
         {
           "refId": "A",
-          "rawSql": "SELECT $__timeGroupAlias(time,$__interval), node_id AS \"metric\", avg(rms) AS \"STA/LTA Ratio\" FROM sensor_telemetry WHERE $__timeFilter(time) AND node_id IN ($node_id) GROUP BY 1,2 ORDER BY 1",
+          "rawSql": "SELECT $__timeGroupAlias(ts,$__interval), node_id AS \"metric\", avg(sta_lta) AS \"STA/LTA Ratio\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) GROUP BY 1,2 ORDER BY 1",
           "format": "time_series",
           "datasource": {
             "type": "grafana-postgresql-datasource",
@@ -210,21 +232,52 @@
       ],
       "fieldConfig": {
         "defaults": {
+          "unit": "none",
+          "min": 0,
+          "softMax": 3,
           "custom": {
-            "fillOpacity": 20,
+            "fillOpacity": 15,
             "lineWidth": 2,
-            "gradientMode": "opacity",
+            "gradientMode": "scheme",
+            "thresholdsStyle": {
+              "mode": "line+area"
+            },
             "drawStyle": "line",
             "lineInterpolation": "smooth",
             "showPoints": "never",
             "spanNulls": true
           },
-          "unit": "none"
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#73BF69",
+                "value": null
+              },
+              {
+                "color": "#FF9830",
+                "value": 1.5
+              },
+              {
+                "color": "#F2495C",
+                "value": 2.0
+              }
+            ]
+          }
         }
       },
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "lindu_pg"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
       },
       "id": 3
     },
