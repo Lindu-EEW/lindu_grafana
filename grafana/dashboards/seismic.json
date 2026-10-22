@@ -10,10 +10,10 @@
       "type": "table",
       "title": "📡 Live Fleet Status (Online / Offline)",
       "gridPos": {
-        "w": 18,
-        "h": 5,
         "x": 6,
-        "y": 0
+        "y": 0,
+        "w": 18,
+        "h": 5
       },
       "datasource": {
         "type": "grafana-postgresql-datasource",
@@ -89,10 +89,10 @@
       "type": "stat",
       "title": "Active Nodes (Last 1 Min)",
       "gridPos": {
-        "w": 6,
-        "h": 5,
         "x": 0,
-        "y": 0
+        "y": 0,
+        "w": 6,
+        "h": 5
       },
       "targets": [
         {
@@ -141,36 +141,36 @@
     },
     {
       "type": "timeseries",
-      "title": "Grafik Seismogram Live (PGA)",
+      "title": "🌊 Grafik Seismogram Live (PGA)",
       "gridPos": {
-        "w": 12,
-        "h": 8,
         "x": 0,
-        "y": 5
+        "y": 5,
+        "w": 12,
+        "h": 9
       },
       "targets": [
         {
-          "refId": "A",
-          "rawSql": "SELECT $__timeGroupAlias(time,$__interval), node_id AS \"metric\", max(pga) AS \"Total Guncangan (PGA)\" FROM sensor_telemetry WHERE $__timeFilter(time) AND node_id IN ($node_id) GROUP BY 1,2 ORDER BY 1",
-          "format": "time_series",
           "datasource": {
             "type": "grafana-postgresql-datasource",
             "uid": "lindu_pg"
-          }
+          },
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, node_id AS \"metric\", pga AS \"PGA (g)\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) ORDER BY ts",
+          "refId": "A"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "g",
           "min": 0,
-          "softMax": 0.05,
+          "softMax": 0.03,
           "custom": {
             "drawStyle": "line",
             "lineInterpolation": "linear",
             "lineWidth": 1,
-            "fillOpacity": 10,
+            "fillOpacity": 12,
             "thresholdsStyle": {
-              "mode": "line"
+              "mode": "dashed"
             },
             "spanNulls": 1500,
             "showPoints": "auto",
@@ -185,7 +185,7 @@
               },
               {
                 "color": "#FADE2A",
-                "value": 0.004
+                "value": 0.008
               },
               {
                 "color": "#F2495C",
@@ -214,52 +214,54 @@
         }
       },
       "id": 2,
-      "description": "Tenang < 0.004g · Gempa Mikro >= 0.004g · Terasa >= 0.05g. Titik muncul hanya saat node mendeteksi getaran."
+      "description": "Tenang < 0.008g (Ambient Noise Ruangan) · Gempa Mikro 0.008g–0.020g · Gempa Kuat >= 0.050g"
     },
     {
       "type": "timeseries",
-      "title": "Rasio STA/LTA (Trigger)",
+      "title": "📈 Rasio STA/LTA Seismik (Trigger Gempa)",
       "gridPos": {
-        "w": 12,
-        "h": 8,
         "x": 12,
-        "y": 5
+        "y": 5,
+        "w": 12,
+        "h": 9
       },
       "targets": [
         {
-          "refId": "A",
-          "rawSql": "SELECT ts AS time, node_id AS metric, sta_lta AS \"STA/LTA\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) ORDER BY ts",
-          "format": "time_series",
           "datasource": {
             "type": "grafana-postgresql-datasource",
             "uid": "lindu_pg"
-          }
+          },
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, node_id AS \"metric\", sta_lta AS \"STA/LTA\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) ORDER BY ts",
+          "refId": "A"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "none",
           "min": 0,
-          "softMax": 4,
+          "softMax": 3.5,
           "custom": {
-            "fillOpacity": 8,
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
             "lineWidth": 2,
-            "gradientMode": "none",
+            "fillOpacity": 8,
             "thresholdsStyle": {
               "mode": "dashed"
             },
-            "drawStyle": "line",
-            "lineInterpolation": "linear",
-            "showPoints": "always",
             "spanNulls": 1500,
-            "pointSize": 5
+            "showPoints": "never"
           },
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "#73BF69",
+                "color": "#5794F2",
                 "value": null
+              },
+              {
+                "color": "#73BF69",
+                "value": 0.8
               },
               {
                 "color": "#FF9830",
@@ -296,16 +298,16 @@
         }
       },
       "id": 3,
-      "description": "Tenang ~1.0 · Gempa Mikro >= 1.5 · Gempa Kuat >= 2.0. Titik muncul hanya saat node mendeteksi getaran."
+      "description": "Baseline Tenang ~1.0 · Trigger P-Wave >= 1.50 · Gempa Tervalidasi >= 2.00"
     },
     {
       "type": "timeseries",
       "title": "Temperature (°C)",
       "gridPos": {
-        "w": 12,
-        "h": 8,
         "x": 0,
-        "y": 13
+        "y": 54,
+        "w": 8,
+        "h": 8
       },
       "targets": [
         {
@@ -340,10 +342,10 @@
       "type": "timeseries",
       "title": "Barometric Pressure (hPa)",
       "gridPos": {
-        "w": 12,
-        "h": 8,
-        "x": 12,
-        "y": 13
+        "x": 8,
+        "y": 54,
+        "w": 8,
+        "h": 8
       },
       "targets": [
         {
@@ -379,10 +381,10 @@
       "type": "stat",
       "title": "Current Tilt Angle",
       "gridPos": {
-        "w": 8,
-        "h": 8,
-        "x": 0,
-        "y": 21
+        "x": 6,
+        "y": 14,
+        "w": 6,
+        "h": 8
       },
       "targets": [
         {
@@ -418,10 +420,10 @@
       "type": "timeseries",
       "title": "Network Latency (ESP32 to MQTT)",
       "gridPos": {
-        "w": 16,
-        "h": 8,
-        "x": 8,
-        "y": 21
+        "x": 6,
+        "y": 62,
+        "w": 8,
+        "h": 8
       },
       "targets": [
         {
@@ -476,10 +478,10 @@
       "type": "table",
       "title": "🚨 Log Gempa Tervalidasi (Konsensus Multi-Node)",
       "gridPos": {
-        "w": 24,
-        "h": 8,
         "x": 0,
-        "y": 33
+        "y": 30,
+        "w": 24,
+        "h": 8
       },
       "targets": [
         {
@@ -502,10 +504,10 @@
       "type": "table",
       "title": "Actuator Valve Status",
       "gridPos": {
-        "w": 12,
-        "h": 6,
         "x": 0,
-        "y": 41
+        "y": 38,
+        "w": 6,
+        "h": 8
       },
       "datasource": {
         "type": "grafana-postgresql-datasource",
@@ -545,10 +547,10 @@
       "title": "Interactive Command Center",
       "type": "text",
       "gridPos": {
-        "w": 14,
-        "h": 9,
-        "x": 10,
-        "y": 63
+        "x": 14,
+        "y": 62,
+        "w": 10,
+        "h": 8
       },
       "options": {
         "mode": "html",
@@ -561,20 +563,20 @@
       "title": "🌊 PGA Terkini (Peak Ground Acceleration)",
       "id": 20,
       "gridPos": {
-        "w": 12,
-        "h": 8,
         "x": 0,
-        "y": 5
+        "y": 14,
+        "w": 6,
+        "h": 8
       },
       "targets": [
         {
-          "refId": "A",
-          "rawSql": "SELECT CASE WHEN NOW() - ts > INTERVAL '15 seconds' THEN 0 ELSE pga END AS \"PGA\" FROM tb_sensor_telemetry ORDER BY ts DESC LIMIT 1",
-          "format": "table",
           "datasource": {
             "type": "grafana-postgresql-datasource",
             "uid": "lindu_pg"
-          }
+          },
+          "format": "table",
+          "rawSql": "SELECT pga AS \"PGA\" FROM tb_sensor_telemetry WHERE node_id IN ($node_id) ORDER BY ts DESC LIMIT 1",
+          "refId": "A"
         }
       ],
       "datasource": {
@@ -585,29 +587,21 @@
         "defaults": {
           "unit": "g",
           "min": 0,
-          "max": 2,
+          "max": 0.1,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "#73BF69",
+                "color": "green",
                 "value": null
               },
               {
-                "color": "#FADE2A",
+                "color": "#EAB839",
+                "value": 0.008
+              },
+              {
+                "color": "red",
                 "value": 0.05
-              },
-              {
-                "color": "#FF9830",
-                "value": 0.12
-              },
-              {
-                "color": "#F2495C",
-                "value": 0.3
-              },
-              {
-                "color": "#8B0000",
-                "value": 0.6
               }
             ]
           }
@@ -628,20 +622,20 @@
       "title": "🎵 Frekuensi Dominan (Hz) — Gempa < 15Hz, Noise > 20Hz",
       "id": 21,
       "gridPos": {
-        "w": 12,
-        "h": 8,
         "x": 12,
-        "y": 5
+        "y": 14,
+        "w": 12,
+        "h": 8
       },
       "targets": [
         {
-          "refId": "A",
-          "rawSql": "SELECT ts AS time, freq_hz AS \"Frekuensi (Hz)\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) ORDER BY ts",
-          "format": "time_series",
           "datasource": {
             "type": "grafana-postgresql-datasource",
             "uid": "lindu_pg"
-          }
+          },
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, node_id AS \"metric\", freq_hz AS \"Frekuensi (Hz)\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) ORDER BY ts",
+          "refId": "A"
         }
       ],
       "datasource": {
@@ -691,10 +685,10 @@
       "title": "🖥️ Lindu Backend (Host Health)",
       "id": 22,
       "gridPos": {
-        "w": 10,
-        "h": 9,
         "x": 0,
-        "y": 63
+        "y": 62,
+        "w": 6,
+        "h": 8
       },
       "targets": [
         {
@@ -750,10 +744,10 @@
       "title": "📋 Remote Serial Monitor (Internal ESP32 Logs) - $node_id",
       "id": 23,
       "gridPos": {
-        "w": 24,
-        "h": 7,
         "x": 0,
-        "y": 72
+        "y": 70,
+        "w": 24,
+        "h": 8
       },
       "targets": [
         {
@@ -776,10 +770,10 @@
       "title": "🚶 PIR Motion (Terkini)",
       "id": 24,
       "gridPos": {
+        "x": 6,
+        "y": 38,
         "w": 6,
-        "h": 6,
-        "x": 12,
-        "y": 41
+        "h": 8
       },
       "datasource": {
         "type": "grafana-postgresql-datasource",
@@ -864,10 +858,10 @@
       "title": "🚶 Riwayat Deteksi PIR",
       "id": 25,
       "gridPos": {
-        "w": 6,
-        "h": 6,
-        "x": 18,
-        "y": 41
+        "x": 12,
+        "y": 38,
+        "w": 12,
+        "h": 8
       },
       "datasource": {
         "type": "grafana-postgresql-datasource",
@@ -920,10 +914,10 @@
       "type": "timeseries",
       "title": "💨 Konsentrasi Gas (MQ-2)",
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 80
+        "x": 16,
+        "y": 54,
+        "w": 8,
+        "h": 8
       },
       "datasource": {
         "type": "grafana-postgresql-datasource",
@@ -983,27 +977,27 @@
     },
     {
       "id": 27,
-      "title": "🤖 TinyML Shadow Mode: Probabilitas Gempa vs Algoritma Klasik (%)",
+      "title": "🤖 TinyML Shadow Mode: Probabilitas Gempa (%)",
       "type": "timeseries",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "lindu_pg"
       },
       "gridPos": {
-        "h": 8,
+        "x": 0,
+        "y": 22,
         "w": 12,
-        "x": 12,
-        "y": 80
+        "h": 8
       },
       "targets": [
         {
-          "refId": "A",
-          "rawSql": "SELECT $__timeGroupAlias(time,$__interval), node_id AS \"metric\", avg(ml_prob) * 100.0 AS \"TinyML Confidence (%)\" FROM sensor_telemetry WHERE $__timeFilter(time) AND node_id IN ($node_id) AND ml_prob IS NOT NULL GROUP BY 1,2 ORDER BY 1",
-          "format": "time_series",
           "datasource": {
             "type": "grafana-postgresql-datasource",
             "uid": "lindu_pg"
-          }
+          },
+          "format": "time_series",
+          "rawSql": "SELECT ts AS time, node_id AS \"metric\", ml_prob * 100.0 AS \"TinyML Confidence (%)\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) AND ml_prob IS NOT NULL ORDER BY ts",
+          "refId": "A"
         }
       ],
       "fieldConfig": {
@@ -1049,17 +1043,18 @@
           "placement": "bottom",
           "showLegend": true
         }
-      }
+      },
+      "description": "Probabilitas AI Gempa Riil (0 - 100%). Deteksi Gempa jika >= 40%."
     },
     {
       "id": 30,
       "type": "table",
       "title": "📜 Log Aktuator (Valve / Door / Buzzer / LED)",
       "gridPos": {
-        "w": 24,
-        "h": 8,
         "x": 0,
-        "y": 47
+        "y": 46,
+        "w": 12,
+        "h": 8
       },
       "datasource": {
         "type": "grafana-postgresql-datasource",
@@ -1095,10 +1090,10 @@
       "type": "state-timeline",
       "title": "📊 Riwayat State Aktuator",
       "gridPos": {
-        "w": 24,
-        "h": 8,
-        "x": 0,
-        "y": 55
+        "x": 12,
+        "y": 46,
+        "w": 12,
+        "h": 8
       },
       "datasource": {
         "type": "grafana-postgresql-datasource",
@@ -1137,10 +1132,10 @@
         "uid": "lindu_pg"
       },
       "gridPos": {
-        "w": 24,
-        "h": 5,
-        "x": 0,
-        "y": 13
+        "x": 12,
+        "y": 22,
+        "w": 12,
+        "h": 8
       },
       "targets": [
         {
@@ -1300,5 +1295,9 @@
     ]
   },
   "version": 9,
-  "uid": "b0619202-bdfa-49ef-801d-70b3d143c357"
+  "uid": "b0619202-bdfa-49ef-801d-70b3d143c357",
+  "time": {
+    "from": "now-5m",
+    "to": "now"
+  }
 }
