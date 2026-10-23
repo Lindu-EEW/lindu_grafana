@@ -574,8 +574,8 @@
             "type": "grafana-postgresql-datasource",
             "uid": "lindu_pg"
           },
-          "format": "table",
-          "rawSql": "SELECT pga AS \"PGA\" FROM tb_sensor_telemetry WHERE node_id IN ($node_id) ORDER BY ts DESC LIMIT 1",
+          "format": "time_series",
+          "rawSql": "SELECT ts AS \"time\", node_id AS \"metric\", pga FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) ORDER BY ts",
           "refId": "A"
         }
       ],
@@ -611,11 +611,13 @@
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
-          ]
+          ],
+          "values": false
         },
         "showThresholdLabels": true,
         "showThresholdMarkers": true
-      }
+      },
+      "description": "PGA Terkini per node (last reading). Menampilkan nilai masing-masing node secara stabil tanpa melompat antar-node."
     },
     {
       "type": "timeseries",
