@@ -155,7 +155,7 @@
             "uid": "lindu_pg"
           },
           "format": "time_series",
-          "rawSql": "SELECT ts AS time, node_id AS \"metric\", pga AS \"PGA (g)\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) ORDER BY ts",
+          "rawSql": "SELECT time_bucket('100ms', ts) AS time, node_id AS \"metric\", MAX(pga) AS \"PGA (g)\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) GROUP BY 1, 2 ORDER BY 1",
           "refId": "A"
         }
       ],
@@ -172,8 +172,8 @@
             "thresholdsStyle": {
               "mode": "dashed"
             },
-            "spanNulls": 1500,
-            "showPoints": "auto",
+            "spanNulls": true,
+            "showPoints": "never",
             "pointSize": 3
           },
           "thresholds": {
@@ -232,7 +232,7 @@
             "uid": "lindu_pg"
           },
           "format": "time_series",
-          "rawSql": "SELECT ts AS time, node_id AS \"metric\", sta_lta AS \"STA/LTA\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) ORDER BY ts",
+          "rawSql": "SELECT time_bucket('100ms', ts) AS time, node_id AS \"metric\", round(avg(sta_lta)::numeric, 2) AS \"STA/LTA\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) GROUP BY 1, 2 ORDER BY 1",
           "refId": "A"
         }
       ],
@@ -244,12 +244,12 @@
           "custom": {
             "drawStyle": "line",
             "lineInterpolation": "linear",
-            "lineWidth": 2,
+            "lineWidth": 1,
             "fillOpacity": 8,
             "thresholdsStyle": {
               "mode": "dashed"
             },
-            "spanNulls": 1500,
+            "spanNulls": true,
             "showPoints": "never"
           },
           "thresholds": {
@@ -575,7 +575,7 @@
             "uid": "lindu_pg"
           },
           "format": "time_series",
-          "rawSql": "SELECT ts AS \"time\", node_id AS \"metric\", pga FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) ORDER BY ts",
+          "rawSql": "SELECT ts AS \"time\", node_id AS \"metric\", pga FROM tb_sensor_telemetry WHERE ts >= NOW() - INTERVAL '5 seconds' AND node_id IN ($node_id) ORDER BY ts",
           "refId": "A"
         }
       ],
@@ -636,7 +636,7 @@
             "uid": "lindu_pg"
           },
           "format": "time_series",
-          "rawSql": "SELECT ts AS time, node_id AS \"metric\", freq_hz AS \"Frekuensi (Hz)\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) ORDER BY ts",
+          "rawSql": "SELECT time_bucket('500ms', ts) AS time, node_id AS \"metric\", round(avg(freq_hz)) AS \"Frekuensi (Hz)\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) GROUP BY 1, 2 ORDER BY 1",
           "refId": "A"
         }
       ],
@@ -998,7 +998,7 @@
             "uid": "lindu_pg"
           },
           "format": "time_series",
-          "rawSql": "SELECT ts AS time, node_id AS \"metric\", ml_prob * 100.0 AS \"TinyML Confidence (%)\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) AND ml_prob IS NOT NULL ORDER BY ts",
+          "rawSql": "SELECT time_bucket('500ms', ts) AS time, node_id AS \"metric\", round(avg(ml_prob * 100.0)::numeric, 1) AS \"TinyML Confidence (%)\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) AND ml_prob IS NOT NULL GROUP BY 1, 2 ORDER BY 1",
           "refId": "A"
         }
       ],
@@ -1147,7 +1147,7 @@
             "type": "grafana-postgresql-datasource",
             "uid": "lindu_pg"
           },
-          "rawSql": "SELECT ts AS \"time\", node_id AS \"metric\", CASE WHEN pga >= 0.05 AND sta_lta >= 2.0 THEN 'Gempa Kuat' WHEN pga >= 0.004 AND sta_lta >= 1.5 THEN 'Gempa Mikro' ELSE 'Getaran Lemah' END AS \"Status\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) ORDER BY ts"
+          "rawSql": "SELECT time_bucket('1s', ts) AS \"time\", node_id AS \"metric\", CASE WHEN max(pga) >= 0.05 AND max(sta_lta) >= 2.0 THEN 'Gempa Kuat' WHEN max(pga) >= 0.004 AND max(sta_lta) >= 1.5 THEN 'Gempa Mikro' ELSE 'Getaran Lemah' END AS \"Status\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) GROUP BY 1, 2 ORDER BY 1"
         }
       ],
       "options": {
@@ -1297,7 +1297,7 @@
       }
     }
   ],
-  "refresh": "5s",
+  "refresh": "2s",
   "templating": {
     "list": [
       {
