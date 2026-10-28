@@ -636,7 +636,7 @@
             "uid": "lindu_pg"
           },
           "format": "time_series",
-          "rawSql": "SELECT time_bucket('500ms', ts) AS time, node_id AS \"metric\", round(avg(freq_hz)) AS \"Frekuensi (Hz)\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) GROUP BY 1, 2 ORDER BY 1",
+          "rawSql": "SELECT time_bucket('500ms', ts) AS time, node_id AS \"metric\", CASE WHEN max(pga) < 0.0040 THEN 0 ELSE round(avg(freq_hz)) END AS \"Frekuensi (Hz)\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) GROUP BY 1, 2 ORDER BY 1",
           "refId": "A"
         }
       ],
@@ -650,7 +650,7 @@
           "custom": {
             "drawStyle": "line",
             "lineWidth": 2,
-            "fillOpacity": 20,
+            "fillOpacity": 15,
             "gradientMode": "scheme",
             "thresholdsStyle": {
               "mode": "area"
@@ -660,27 +660,28 @@
             "spanNulls": true
           },
           "color": {
-            "mode": "continuous-BlYlRd"
+            "mode": "thresholds"
           },
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "#F2495C",
+                "color": "#73BF69",
                 "value": null
               },
               {
-                "color": "#73BF69",
+                "color": "#FADE2A",
                 "value": 15
               },
               {
-                "color": "#FADE2A",
+                "color": "#F2495C",
                 "value": 20
               }
             ]
           }
         }
-      }
+      },
+      "description": "Frekuensi dominan getaran. Saat kondisi tenang (PGA < 0.004g) bernilai 0 Hz (Idle). Frekuensi getaran gempa berada pada 0.5 - 15 Hz, derau mekanis > 20 Hz."
     },
     {
       "type": "stat",
