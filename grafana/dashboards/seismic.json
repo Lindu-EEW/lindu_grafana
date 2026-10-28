@@ -155,7 +155,7 @@
             "uid": "lindu_pg"
           },
           "format": "time_series",
-          "rawSql": "SELECT ts AS time, node_id AS \"metric\", pga AS \"PGA (g)\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) ORDER BY ts",
+          "rawSql": "SELECT time_bucket('500ms', ts) AS time, node_id AS \"metric\", MAX(pga) AS \"PGA (g)\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) GROUP BY 1, 2 ORDER BY 1",
           "refId": "A"
         }
       ],
@@ -233,7 +233,7 @@
             "uid": "lindu_pg"
           },
           "format": "time_series",
-          "rawSql": "SELECT ts AS time, node_id AS \"metric\", sta_lta AS \"STA/LTA\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) ORDER BY ts",
+          "rawSql": "SELECT time_bucket('500ms', ts) AS time, node_id AS \"metric\", round(avg(sta_lta)::numeric, 2) AS \"STA/LTA\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) GROUP BY 1, 2 ORDER BY 1",
           "refId": "A"
         }
       ],
@@ -576,7 +576,7 @@
             "uid": "lindu_pg"
           },
           "format": "time_series",
-          "rawSql": "SELECT ts AS \"time\", node_id AS \"metric\", pga FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) ORDER BY ts",
+          "rawSql": "SELECT DISTINCT ON (node_id) ts AS \"time\", node_id AS \"metric\", pga FROM tb_sensor_telemetry WHERE ts >= NOW() - INTERVAL '15 seconds' AND node_id IN ($node_id) ORDER BY node_id, ts DESC",
           "refId": "A"
         }
       ],
@@ -637,7 +637,7 @@
             "uid": "lindu_pg"
           },
           "format": "time_series",
-          "rawSql": "SELECT ts AS time, node_id AS \"metric\", freq_hz AS \"Frekuensi (Hz)\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) ORDER BY ts",
+          "rawSql": "SELECT time_bucket('1s', ts) AS time, node_id AS \"metric\", round(avg(freq_hz)) AS \"Frekuensi (Hz)\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) GROUP BY 1, 2 ORDER BY 1",
           "refId": "A"
         }
       ],
@@ -999,7 +999,7 @@
             "uid": "lindu_pg"
           },
           "format": "time_series",
-          "rawSql": "SELECT ts AS time, node_id AS \"metric\", ml_prob * 100.0 AS \"TinyML Confidence (%)\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) AND ml_prob IS NOT NULL ORDER BY ts",
+          "rawSql": "SELECT time_bucket('1s', ts) AS time, node_id AS \"metric\", round(avg(ml_prob * 100.0)::numeric, 1) AS \"TinyML Confidence (%)\" FROM tb_sensor_telemetry WHERE $__timeFilter(ts) AND node_id IN ($node_id) AND ml_prob IS NOT NULL GROUP BY 1, 2 ORDER BY 1",
           "refId": "A"
         }
       ],
