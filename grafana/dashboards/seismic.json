@@ -8,7 +8,7 @@
   "panels": [
     {
       "type": "table",
-      "title": "\ud83d\udce1 Live Fleet Status (Online / Offline)",
+      "title": "📡 Live Fleet Status (Online / Offline)",
       "gridPos": {
         "h": 5,
         "w": 18,
@@ -59,12 +59,12 @@
                       "OFFLINE": {
                         "color": "red",
                         "index": 0,
-                        "text": "\ud83d\udd34 OFFLINE"
+                        "text": "🔴 OFFLINE"
                       },
                       "ONLINE": {
                         "color": "green",
                         "index": 1,
-                        "text": "\ud83d\udfe2 ONLINE"
+                        "text": "🟢 ONLINE"
                       }
                     }
                   }
@@ -141,7 +141,7 @@
     },
     {
       "type": "timeseries",
-      "title": "\ud83c\udf0a Grafik Seismogram Live (PGA)",
+      "title": "🌊 Grafik Seismogram Live (PGA)",
       "gridPos": {
         "h": 9,
         "w": 12,
@@ -214,11 +214,11 @@
         }
       },
       "id": 2,
-      "description": "Tenang < 0.008g (Ambient Noise Ruangan) \u00b7 Gempa Mikro 0.008g\u20130.020g \u00b7 Gempa Kuat >= 0.050g"
+      "description": "Tenang < 0.008g (Ambient Noise Ruangan) · Gempa Mikro 0.008g–0.020g · Gempa Kuat >= 0.050g"
     },
     {
       "type": "timeseries",
-      "title": "\ud83d\udcc8 Rasio STA/LTA Seismik (Trigger Gempa)",
+      "title": "📈 Rasio STA/LTA Seismik (Trigger Gempa)",
       "gridPos": {
         "h": 9,
         "w": 12,
@@ -298,11 +298,11 @@
         }
       },
       "id": 3,
-      "description": "Baseline Tenang ~1.0 \u00b7 Trigger P-Wave >= 1.50 \u00b7 Gempa Tervalidasi >= 2.00"
+      "description": "Baseline Tenang ~1.0 · Trigger P-Wave >= 1.50 · Gempa Tervalidasi >= 2.00"
     },
     {
       "type": "timeseries",
-      "title": "Temperature (\u00b0C)",
+      "title": "Temperature (°C)",
       "gridPos": {
         "h": 8,
         "w": 8,
@@ -312,7 +312,7 @@
       "targets": [
         {
           "refId": "A",
-          "rawSql": "SELECT $__timeGroupAlias(time,$__interval), node_id AS \"node_id\", avg(temperature) AS \"Temperature (\u00b0C)\" FROM sensor_telemetry WHERE $__timeFilter(time) AND node_id IN ($node_id) AND temperature IS NOT NULL GROUP BY 1,2 ORDER BY 1",
+          "rawSql": "SELECT $__timeGroupAlias(time,$__interval), node_id AS \"node_id\", avg(temperature) AS \"Temperature (°C)\" FROM sensor_telemetry WHERE $__timeFilter(time) AND node_id IN ($node_id) AND temperature IS NOT NULL GROUP BY 1,2 ORDER BY 1",
           "format": "time_series",
           "datasource": {
             "type": "grafana-postgresql-datasource",
@@ -476,7 +476,7 @@
     },
     {
       "type": "table",
-      "title": "\ud83d\udea8 Log Gempa Tervalidasi (Konsensus Multi-Node)",
+      "title": "🚨 Log Gempa Tervalidasi (Konsensus Multi-Node)",
       "gridPos": {
         "h": 8,
         "w": 24,
@@ -486,7 +486,7 @@
       "targets": [
         {
           "refId": "A",
-          "rawSql": "SELECT \n  time_alert AT TIME ZONE 'Asia/Tokyo' AS \"Waktu Gempa (JST)\", \n  magnitude AS \"Magnitudo\", \n  CASE \n    WHEN magnitude >= 7.0 THEN '\ud83d\udd34 Dahsyat'\n    WHEN magnitude >= 6.0 THEN '\ud83d\udfe0 Kuat' \n    WHEN magnitude >= 5.0 THEN '\ud83d\udfe1 Sedang'\n    ELSE '\ud83d\udfe2 Ringan'\n  END AS \"Klasifikasi\",\n  radius_km AS \"Radius (km)\", \n  COALESCE(jsonb_array_length(triggering_nodes), 0) AS \"Jumlah Node\",\n  description AS \"Detail Analisis\" \nFROM tb_system_alerts \nORDER BY time_alert DESC LIMIT 20",
+          "rawSql": "SELECT \n  time_alert AT TIME ZONE 'Asia/Tokyo' AS \"Waktu Gempa (JST)\", \n  magnitude AS \"Magnitudo\", \n  CASE \n    WHEN magnitude >= 7.0 THEN '🔴 Dahsyat'\n    WHEN magnitude >= 6.0 THEN '🟠 Kuat' \n    WHEN magnitude >= 5.0 THEN '🟡 Sedang'\n    ELSE '🟢 Ringan'\n  END AS \"Klasifikasi\",\n  radius_km AS \"Radius (km)\", \n  COALESCE(jsonb_array_length(triggering_nodes), 0) AS \"Jumlah Node\",\n  description AS \"Detail Analisis\" \nFROM tb_system_alerts \nORDER BY time_alert DESC LIMIT 20",
           "format": "table",
           "datasource": {
             "type": "grafana-postgresql-datasource",
@@ -554,13 +554,13 @@
       },
       "options": {
         "mode": "html",
-        "content": "\n<div style=\"padding: 10px; background-color: #1a1b26; border-radius: 8px; border: 1px solid #2ac06d;\">\n  <h3 style=\"color: #2ac06d; margin-top: 0;\"><i class=\"fa fa-terminal\"></i> Command Center (Interactive)</h3>\n  <p style=\"color: #9aa5ce; font-size: 12px; margin-bottom: 15px;\">Send real-time commands to the ESP32 network directly from Grafana.</p>\n  \n  <div style=\"display: flex; gap: 10px; flex-wrap: wrap; background: #24283b; padding: 10px; border-radius: 4px; border: 1px solid #414868;\">\n    <p style=\"color: #9ece6a; margin: 0; font-size: 13px;\"><b>Target Aktif:</b> <span id=\"displayTarget\" style=\"color:white; font-family: monospace;\">$node_id</span> <i style=\"color:#9aa5ce; font-size:11px;\">(Mengikuti Dropdown di Atas)</i></p>\n  </div>\n  \n  <div style=\"display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; background: #2d1b1b; padding: 10px; border-radius: 4px; border: 1px solid #f7768e;\">\n    <button onclick=\"if(confirm('Simulasikan alarm gempa CRITICAL (M6.5) sekarang? Ini akan membunyikan sirine node fisik & memicu banner di dashboard utama, tanpa perlu 2 node asli.')) sendCmd('simulate_quake')\" style=\"background: #f7768e; color: #1a1b26; font-weight: bold; border: none; padding: 12px 15px; border-radius: 4px; cursor: pointer; flex: 1; min-width: 150px; font-size: 14px;\">\ud83e\uddea SIMULASI GEMPA (DEBUG - TANPA 2 NODE)</button>\n  </div>\n  \n  <div style=\"display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; background: #1f2335; padding: 10px; border-radius: 4px;\">\n    <input type=\"number\" id=\"newLat\" placeholder=\"New Latitude (e.g. -6.123)\" step=\"0.0001\" style=\"padding: 8px; background: #24283b; color: #fff; border: 1px solid #414868; border-radius: 4px; flex: 1; min-width: 150px; min-width: 100px;\">\n    <input type=\"number\" id=\"newLon\" placeholder=\"New Longitude (e.g. 106.123)\" step=\"0.0001\" style=\"padding: 8px; background: #24283b; color: #fff; border: 1px solid #414868; border-radius: 4px; flex: 1; min-width: 150px; min-width: 100px;\">\n    <button onclick=\"sendCmd('set_location')\" style=\"background: #bb9af7; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;\"><i class=\"fa fa-map-marker\"></i> SET KOORDINAT BARU</button>\n  </div>\n            <div style=\"padding:10px; border:1px solid #73BF69; border-radius:5px; margin-bottom:10px; text-align:center;\">\n                <h4>\ud83c\udf10 Migrasi Server (Staging/Production)</h4>\n                <input type=\"text\" id=\"new_broker\" placeholder=\"mqtt.lindu-eew.com\" style=\"padding:5px; color:black;\">\n                <button onclick=\"sendCmd('set_broker')\" style=\"padding:5px 15px; background:#73BF69; color:white; border:none; border-radius:3px;\">MIGRATE TO NEW SERVER</button>\n            </div>\n            \n  \n  <div style=\"display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;\">\n    <button onclick=\"sendCmd('enable_debug')\" style=\"background: #00E5FF; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1; min-width: 150px;\"><i class=\"fa fa-bug\"></i> ENABLE DEBUG LOG</button>\n    <button onclick=\"sendCmd('disable_debug')\" style=\"background: #414868; color: #ffffff; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1; min-width: 150px;\"><i class=\"fa fa-ban\"></i> DISABLE DEBUG</button>\n  </div>\n  <div style=\"display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;\">\n    <button onclick=\"sendCmd('disable_valve')\" style=\"background: #f7768e; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1; min-width: 150px;\"><i class=\"fa fa-lock\"></i> LOCK VALVE</button>\n    <button onclick=\"sendCmd('enable_valve')\" style=\"background: #9ece6a; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1; min-width: 150px;\"><i class=\"fa fa-unlock\"></i> UNLOCK VALVE</button>\n  </div>\n  \n  <div style=\"display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;\">\n    <button onclick=\"sendCmd('identify')\" style=\"background: #e0af68; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1; min-width: 150px;\"><i class=\"fa fa-lightbulb-o\"></i> IDENTIFY NODE (BLINK WHITE)</button>\n    <button onclick=\"sendCmd('force_update')\" style=\"background: #7aa2f7; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1; min-width: 150px;\"><i class=\"fa fa-download\"></i> FORCE OTA UPDATE</button>\n  </div>\n  <div style=\"display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; background: #1f2937; padding: 10px; border-radius: 4px; border: 1px solid #e0af68;\">\n    <button onclick=\"if(confirm('Reset nilai sensor PIR? Node akan dianggap TIDAK ADA gerakan/manusia terdeteksi sama sekali dalam 10 menit terakhir (dipakai untuk testing behavior door-lock saat sensor PIR belum terpasang secara fisik).')) sendCmd('reset_pir')\" style=\"background: #e0af68; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1; min-width: 150px;\"><i class=\"fa fa-refresh\"></i> RESET SENSOR PIR (Anggap 10 Menit Terakhir Tidak Ada Gerakan)</button>\n  </div>\n  <div style=\"display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;\">\n    <button onclick=\"if(confirm('Yakin mereset WiFi & LongLat? Alat akan offline.')) sendCmd('factory_reset')\" style=\"background: #f7768e; color: #ffffff; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1; min-width: 150px;\"><i class=\"fa fa-warning\"></i> FACTORY RESET NODE</button>\n  </div>\n  \n  <p id=\"cmdResult\" style=\"margin-top: 15px; font-family: monospace; font-size: 12px; color: #bb9af7;\"></p>\n</div>\n\n<script>\n  function sendCmd(command) {\n    let target = '$node_id';\n    if (target.includes(',')) { target = 'all'; } // If multiple nodes selected, broadcast to all\n    if (target.includes('__all') || target.toLowerCase() === 'all' || target === '') {\n        target = 'all';\n    }\n\n    const resultBox = document.getElementById('cmdResult');\n    resultBox.innerText = `Sending command '${command}' to '${target}'...`;\n    resultBox.style.color = '#e0af68';\n    \n    fetch('http://localhost:5050/api/cmd', {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ cmd: command, target_node: target, lat: document.getElementById('newLat').value, lon: document.getElementById('newLon').value })\n    })\n    .then(res => res.json())\n    .then(data => {\n      if (data.status === 'success') {\n        resultBox.innerText = `[SUCCESS] Command sent to MQTT broker!`;\n        resultBox.style.color = '#9ece6a';\n      } else {\n        resultBox.innerText = `[ERROR] ${data.error}`;\n        resultBox.style.color = '#f7768e';\n      }\n    })\n    .catch(err => {\n      resultBox.innerText = `[NETWORK ERROR] Could not connect to API at localhost:5050.`;\n      resultBox.style.color = '#f7768e';\n    });\n  }\n</script>\n"
+        "content": "\n<div style=\"padding: 10px; background-color: #1a1b26; border-radius: 8px; border: 1px solid #2ac06d;\">\n  <h3 style=\"color: #2ac06d; margin-top: 0;\"><i class=\"fa fa-terminal\"></i> Command Center (Interactive)</h3>\n  <p style=\"color: #9aa5ce; font-size: 12px; margin-bottom: 15px;\">Send real-time commands to the ESP32 network directly from Grafana.</p>\n  \n  <div style=\"display: flex; gap: 10px; flex-wrap: wrap; background: #24283b; padding: 10px; border-radius: 4px; border: 1px solid #414868;\">\n    <p style=\"color: #9ece6a; margin: 0; font-size: 13px;\"><b>Target Aktif:</b> <span id=\"displayTarget\" style=\"color:white; font-family: monospace;\">$node_id</span> <i style=\"color:#9aa5ce; font-size:11px;\">(Mengikuti Dropdown di Atas)</i></p>\n  </div>\n  \n  <div style=\"display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; background: #2d1b1b; padding: 10px; border-radius: 4px; border: 1px solid #f7768e;\">\n    <button onclick=\"if(confirm('Simulasikan alarm gempa CRITICAL (M6.5) sekarang? Ini akan membunyikan sirine node fisik & memicu banner di dashboard utama, tanpa perlu 2 node asli.')) sendCmd('simulate_quake')\" style=\"background: #f7768e; color: #1a1b26; font-weight: bold; border: none; padding: 12px 15px; border-radius: 4px; cursor: pointer; flex: 1; min-width: 150px; font-size: 14px;\">🧪 SIMULASI GEMPA (DEBUG - TANPA 2 NODE)</button>\n  </div>\n  \n  <div style=\"display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; background: #1f2335; padding: 10px; border-radius: 4px;\">\n    <input type=\"number\" id=\"newLat\" placeholder=\"New Latitude (e.g. -6.123)\" step=\"0.0001\" style=\"padding: 8px; background: #24283b; color: #fff; border: 1px solid #414868; border-radius: 4px; flex: 1; min-width: 150px; min-width: 100px;\">\n    <input type=\"number\" id=\"newLon\" placeholder=\"New Longitude (e.g. 106.123)\" step=\"0.0001\" style=\"padding: 8px; background: #24283b; color: #fff; border: 1px solid #414868; border-radius: 4px; flex: 1; min-width: 150px; min-width: 100px;\">\n    <button onclick=\"sendCmd('set_location')\" style=\"background: #bb9af7; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;\"><i class=\"fa fa-map-marker\"></i> SET KOORDINAT BARU</button>\n  </div>\n            <div style=\"padding:10px; border:1px solid #73BF69; border-radius:5px; margin-bottom:10px; text-align:center;\">\n                <h4>🌐 Migrasi Server (Staging/Production)</h4>\n                <input type=\"text\" id=\"new_broker\" placeholder=\"mqtt.lindu-eew.com\" style=\"padding:5px; color:black;\">\n                <button onclick=\"sendCmd('set_broker')\" style=\"padding:5px 15px; background:#73BF69; color:white; border:none; border-radius:3px;\">MIGRATE TO NEW SERVER</button>\n            </div>\n            \n  \n  <div style=\"display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;\">\n    <button onclick=\"sendCmd('enable_debug')\" style=\"background: #00E5FF; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1; min-width: 150px;\"><i class=\"fa fa-bug\"></i> ENABLE DEBUG LOG</button>\n    <button onclick=\"sendCmd('disable_debug')\" style=\"background: #414868; color: #ffffff; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1; min-width: 150px;\"><i class=\"fa fa-ban\"></i> DISABLE DEBUG</button>\n  </div>\n  <div style=\"display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;\">\n    <button onclick=\"sendCmd('disable_valve')\" style=\"background: #f7768e; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1; min-width: 150px;\"><i class=\"fa fa-lock\"></i> LOCK VALVE</button>\n    <button onclick=\"sendCmd('enable_valve')\" style=\"background: #9ece6a; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1; min-width: 150px;\"><i class=\"fa fa-unlock\"></i> UNLOCK VALVE</button>\n  </div>\n  \n  <div style=\"display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;\">\n    <button onclick=\"sendCmd('identify')\" style=\"background: #e0af68; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1; min-width: 150px;\"><i class=\"fa fa-lightbulb-o\"></i> IDENTIFY NODE (BLINK WHITE)</button>\n    <button onclick=\"sendCmd('force_update')\" style=\"background: #7aa2f7; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1; min-width: 150px;\"><i class=\"fa fa-download\"></i> FORCE OTA UPDATE</button>\n  </div>\n  <div style=\"display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; background: #1f2937; padding: 10px; border-radius: 4px; border: 1px solid #e0af68;\">\n    <button onclick=\"if(confirm('Reset nilai sensor PIR? Node akan dianggap TIDAK ADA gerakan/manusia terdeteksi sama sekali dalam 10 menit terakhir (dipakai untuk testing behavior door-lock saat sensor PIR belum terpasang secara fisik).')) sendCmd('reset_pir')\" style=\"background: #e0af68; color: #1a1b26; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1; min-width: 150px;\"><i class=\"fa fa-refresh\"></i> RESET SENSOR PIR (Anggap 10 Menit Terakhir Tidak Ada Gerakan)</button>\n  </div>\n  <div style=\"display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;\">\n    <button onclick=\"if(confirm('Yakin mereset WiFi & LongLat? Alat akan offline.')) sendCmd('factory_reset')\" style=\"background: #f7768e; color: #ffffff; font-weight: bold; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1; min-width: 150px;\"><i class=\"fa fa-warning\"></i> FACTORY RESET NODE</button>\n  </div>\n  \n  <p id=\"cmdResult\" style=\"margin-top: 15px; font-family: monospace; font-size: 12px; color: #bb9af7;\"></p>\n</div>\n\n<script>\n  function sendCmd(command) {\n    let target = '$node_id';\n    if (target.includes(',')) { target = 'all'; } // If multiple nodes selected, broadcast to all\n    if (target.includes('__all') || target.toLowerCase() === 'all' || target === '') {\n        target = 'all';\n    }\n\n    const resultBox = document.getElementById('cmdResult');\n    resultBox.innerText = `Sending command '${command}' to '${target}'...`;\n    resultBox.style.color = '#e0af68';\n    \n    fetch('http://localhost:5050/api/cmd', {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ cmd: command, target_node: target, lat: document.getElementById('newLat').value, lon: document.getElementById('newLon').value })\n    })\n    .then(res => res.json())\n    .then(data => {\n      if (data.status === 'success') {\n        resultBox.innerText = `[SUCCESS] Command sent to MQTT broker!`;\n        resultBox.style.color = '#9ece6a';\n      } else {\n        resultBox.innerText = `[ERROR] ${data.error}`;\n        resultBox.style.color = '#f7768e';\n      }\n    })\n    .catch(err => {\n      resultBox.innerText = `[NETWORK ERROR] Could not connect to API at localhost:5050.`;\n      resultBox.style.color = '#f7768e';\n    });\n  }\n</script>\n"
       },
       "transparent": true
     },
     {
       "type": "gauge",
-      "title": "\ud83c\udf0a PGA Terkini (Peak Ground Acceleration)",
+      "title": "🌊 PGA Terkini (Peak Ground Acceleration)",
       "id": 20,
       "gridPos": {
         "h": 8,
@@ -610,18 +610,18 @@
       "options": {
         "reduceOptions": {
           "calcs": [
-            "lastNotNull"
+            "max"
           ],
           "values": false
         },
         "showThresholdLabels": true,
         "showThresholdMarkers": true
       },
-      "description": "PGA Terkini per node (last reading). Menampilkan nilai masing-masing node secara stabil tanpa melompat antar-node."
+      "description": "Puncak PGA per node dalam 5 detik terakhir (peak-hold). Getaran singkat tetap terbaca di gauge selama beberapa detik, tidak hilang di antara dua refresh."
     },
     {
       "type": "timeseries",
-      "title": "\ud83c\udfb5 Frekuensi Dominan (Hz) \u2014 Gempa < 15Hz, Noise > 20Hz",
+      "title": "🎵 Frekuensi Dominan (Hz) — Gempa < 15Hz, Noise > 20Hz",
       "id": 21,
       "gridPos": {
         "h": 8,
@@ -685,7 +685,7 @@
     },
     {
       "type": "stat",
-      "title": "\ud83d\udda5\ufe0f Lindu Backend (Host Health)",
+      "title": "🖥️ Lindu Backend (Host Health)",
       "id": 22,
       "gridPos": {
         "h": 8,
@@ -744,7 +744,7 @@
     },
     {
       "type": "table",
-      "title": "\ud83d\udccb Remote Serial Monitor (Internal ESP32 Logs) - $node_id",
+      "title": "📋 Remote Serial Monitor (Internal ESP32 Logs) - $node_id",
       "id": 23,
       "gridPos": {
         "h": 8,
@@ -770,7 +770,7 @@
     },
     {
       "type": "stat",
-      "title": "\ud83d\udeb6 PIR Motion (Terkini)",
+      "title": "🚶 PIR Motion (Terkini)",
       "id": 24,
       "gridPos": {
         "h": 8,
@@ -800,12 +800,12 @@
               "type": "value",
               "options": {
                 "TERDETEKSI": {
-                  "text": "\ud83d\udfe2 TERDETEKSI",
+                  "text": "🟢 TERDETEKSI",
                   "color": "green",
                   "index": 1
                 },
                 "TIDAK ADA GERAKAN": {
-                  "text": "\u26aa TIDAK ADA GERAKAN",
+                  "text": "⚪ TIDAK ADA GERAKAN",
                   "color": "text",
                   "index": 0
                 }
@@ -858,7 +858,7 @@
     },
     {
       "type": "state-timeline",
-      "title": "\ud83d\udeb6 Riwayat Deteksi PIR",
+      "title": "🚶 Riwayat Deteksi PIR",
       "id": 25,
       "gridPos": {
         "h": 8,
@@ -915,7 +915,7 @@
     },
     {
       "type": "timeseries",
-      "title": "\ud83d\udca8 Konsentrasi Gas (MQ-2)",
+      "title": "💨 Konsentrasi Gas (MQ-2)",
       "gridPos": {
         "h": 8,
         "w": 8,
@@ -980,7 +980,7 @@
     },
     {
       "id": 27,
-      "title": "\ud83e\udd16 TinyML Shadow Mode: Probabilitas Gempa Live (%)",
+      "title": "🤖 TinyML Shadow Mode: Probabilitas Gempa Live (%)",
       "type": "timeseries",
       "datasource": {
         "type": "grafana-postgresql-datasource",
@@ -1052,7 +1052,7 @@
     {
       "id": 30,
       "type": "table",
-      "title": "\ud83d\udcdc Log Aktuator (Valve / Door / Buzzer / LED)",
+      "title": "📜 Log Aktuator (Valve / Door / Buzzer / LED)",
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -1091,7 +1091,7 @@
     {
       "id": 31,
       "type": "state-timeline",
-      "title": "\ud83d\udcca Riwayat State Aktuator",
+      "title": "📊 Riwayat State Aktuator",
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -1129,7 +1129,7 @@
     {
       "id": 32,
       "type": "state-timeline",
-      "title": "\ud83c\udf10 Timeline Deteksi Gempa (hanya saat ada getaran)",
+      "title": "🌐 Timeline Deteksi Gempa (hanya saat ada getaran)",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "lindu_pg"
@@ -1194,7 +1194,7 @@
     },
     {
       "id": 28,
-      "title": "\ud83c\udfaf Evaluasi Akurasi TinyML (Kesepakatan AI vs Fisika Klasik)",
+      "title": "🎯 Evaluasi Akurasi TinyML (Kesepakatan AI vs Fisika Klasik)",
       "description": "Menampilkan validasi akurasi on-device AI (TinyML) terhadap algoritma fisika seismik klasik secara real-time.",
       "type": "table",
       "gridPos": {
@@ -1214,7 +1214,7 @@
             "uid": "lindu_pg"
           },
           "format": "table",
-          "rawSql": "SELECT \n    node_id AS \"Node ID\",\n    round(avg(ml_prob*100)::numeric, 1) AS \"Prob Tenang (%)\",\n    round(max(ml_prob*100)::numeric, 1) AS \"Puncak Getaran (%)\",\n    round(100.0 * count(*) FILTER (WHERE ml_agree = true) / count(*), 1) AS \"Akurasi Kesepakatan (%)\",\n    CASE \n        WHEN round(100.0 * count(*) FILTER (WHERE ml_agree = true) / count(*), 1) >= 99.0 THEN '\ud83d\udfe2 SANGAT AKURAT (>=99%)'\n        ELSE '\ud83d\udfe1 CUKUP'\n    END AS \"Status AI\"\nFROM tb_sensor_telemetry\nWHERE $__timeFilter(ts) AND node_id IN ($node_id)\nGROUP BY node_id\nORDER BY node_id;",
+          "rawSql": "SELECT \n    node_id AS \"Node ID\",\n    round(avg(ml_prob*100)::numeric, 1) AS \"Prob Tenang (%)\",\n    round(max(ml_prob*100)::numeric, 1) AS \"Puncak Getaran (%)\",\n    round(100.0 * count(*) FILTER (WHERE ml_agree = true) / count(*), 1) AS \"Akurasi Kesepakatan (%)\",\n    CASE \n        WHEN round(100.0 * count(*) FILTER (WHERE ml_agree = true) / count(*), 1) >= 99.0 THEN '🟢 SANGAT AKURAT (>=99%)'\n        ELSE '🟡 CUKUP'\n    END AS \"Status AI\"\nFROM tb_sensor_telemetry\nWHERE $__timeFilter(ts) AND node_id IN ($node_id)\nGROUP BY node_id\nORDER BY node_id;",
           "refId": "A"
         }
       ],
@@ -1314,7 +1314,7 @@
         "definition": "SELECT DISTINCT node_id FROM tb_nodes",
         "hide": 0,
         "includeAll": true,
-        "label": "\ud83d\udd0d Pilih Node untuk Diinspeksi",
+        "label": "🔍 Pilih Node untuk Diinspeksi",
         "multi": true,
         "name": "node_id",
         "options": [],
@@ -1324,7 +1324,7 @@
       },
       {
         "name": "actuator",
-        "label": "\u2699\ufe0f Aktuator",
+        "label": "⚙️ Aktuator",
         "type": "query",
         "datasource": {
           "type": "grafana-postgresql-datasource",
@@ -1345,7 +1345,7 @@
       },
       {
         "name": "act_state",
-        "label": "\ud83d\udd18 State",
+        "label": "🔘 State",
         "type": "query",
         "datasource": {
           "type": "grafana-postgresql-datasource",
@@ -1366,7 +1366,7 @@
       },
       {
         "name": "act_reason",
-        "label": "\u2753 Alasan",
+        "label": "❓ Alasan",
         "type": "query",
         "datasource": {
           "type": "grafana-postgresql-datasource",
@@ -1390,6 +1390,7 @@
   "timepicker": {
     "refresh_intervals": [
       "1s",
+      "2s",
       "5s",
       "10s",
       "30s",
@@ -1402,7 +1403,7 @@
       "1d"
     ]
   },
-  "version": 9,
+  "version": 11,
   "uid": "b0619202-bdfa-49ef-801d-70b3d143c357",
   "time": {
     "from": "now-5m",
